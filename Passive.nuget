@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>Passive-DB</id>
+    <title>Passive Data-Access Framework</title>
+    <version>0.0.1</version>
+    <authors>Joe Wasson</authors>
+    <description>A "dynamic" data access framework.</description>
+    <language>en-US</language>
+    <licenseUrl>https://github.com/Talljoe/Passive/raw/master/LICENSE.txt</licenseUrl>
+    <projectUrl>https://github.com/Talljoe/Passive</projectUrl>
+  </metadata>
+  <files>
+    <file src="Passive\bin\Release\*.dll" target="lib" />
+  </files>
+</package>
