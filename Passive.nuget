@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
-    <id>Passive-DB</id>
+    <id>Passive</id>
     <title>Passive Data-Access Framework</title>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <authors>Joe Wasson</authors>
     <description>A "dynamic" data access framework.</description>
     <language>en-US</language>

@@ -6,6 +6,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{26B54C9B-1239-4F6E-B2C5-F4A64993FACB}"
 	ProjectSection(SolutionItems) = preProject
 		LICENSE.txt = LICENSE.txt
+		Passive.nuget = Passive.nuget
 		README.markdown = README.markdown
 	EndProjectSection
 EndProject

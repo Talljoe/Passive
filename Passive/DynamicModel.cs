@@ -65,7 +65,7 @@ namespace Passive
         ///   Executes a set of objects as Insert or Update commands based on their property settings, within a transaction.
         ///   These objects can be POCOs, Anonymous, NameValueCollections, or Expandos. Objects With a PK property (whatever PrimaryKeyField is set to) will be created at UPDATEs
         /// </summary>
-        public int Save(params object[] things)
+        public virtual int Save(params object[] things)
         {
             return this.SaveWithWhitelist(null, things);
         }
@@ -74,7 +74,7 @@ namespace Passive
         ///   Executes a set of objects as Insert or Update commands based on their property settings, within a transaction.
         ///   These objects can be POCOs, Anonymous, NameValueCollections, or Expandos. Objects With a PK property (whatever PrimaryKeyField is set to) will be created at UPDATEs
         /// </summary>
-        public int SaveWithWhitelist(object whitelist, params object[] things)
+        public virtual int SaveWithWhitelist(object whitelist, params object[] things)
         {
             return this.Database.Execute(this.BuildCommandsWithWhitelist(whitelist, things), transaction: true);
         }
@@ -111,7 +111,7 @@ namespace Passive
         /// <summary>
         ///   Creates a command for use with transactions - internal stuff mostly, but here for you to play with
         /// </summary>
-        public DynamicCommand CreateInsertCommand(object o, object whitelist = null)
+        protected virtual DynamicCommand CreateInsertCommand(object o, object whitelist = null)
         {
             const string stub = "INSERT INTO {0} ({1}) \r\n VALUES ({2}); SELECT @@IDENTITY AS NewID";
             var items = FilterItems(o, whitelist).ToList();
@@ -131,7 +131,7 @@ namespace Passive
         /// <summary>
         ///   Creates a command for use with transactions - internal stuff mostly, but here for you to play with
         /// </summary>
-        public DynamicCommand CreateUpdateCommand(object o, object key, object whitelist = null)
+        protected virtual DynamicCommand CreateUpdateCommand(object o, object key, object whitelist = null)
         {
             const string stub = "UPDATE {0} SET {1} WHERE {2} = @{3}";
             var items =
@@ -246,7 +246,7 @@ namespace Passive
         /// <summary>
         ///   Removes one or more records from the DB according to the passed-in WHERE
         /// </summary>
-        public DynamicCommand CreateDeleteCommand(object key = null, object where = null, params object[] args)
+        protected virtual DynamicCommand CreateDeleteCommand(object key = null, object where = null, params object[] args)
         {
             return this.BuildCommand(string.Format("DELETE FROM {0}", this.TableName), key, where, args);
         }
@@ -255,7 +255,7 @@ namespace Passive
         ///   Adds a record to the database. You can pass in an Anonymous object, an ExpandoObject, 
         ///   A regular old POCO, or a NameValueColletion from a Request.Form or Request.QueryString
         /// </summary>
-        public object Insert(object o, object whitelist = null)
+        public virtual object Insert(object o, object whitelist = null)
         {
             return this.Database.Scalar(this.CreateInsertCommand(o, whitelist));
         }
@@ -264,7 +264,7 @@ namespace Passive
         ///   Updates a record in the database. You can pass in an Anonymous object, an ExpandoObject,
         ///   A regular old POCO, or a NameValueCollection from a Request.Form or Request.QueryString
         /// </summary>
-        public int Update(object o, object key, object whitelist = null)
+        public virtual int Update(object o, object key, object whitelist = null)
         {
             return this.Database.Execute(this.CreateUpdateCommand(o, key, whitelist));
         }
@@ -272,7 +272,7 @@ namespace Passive
         /// <summary>
         ///   Removes one or more records from the DB according to the passed-in WHERE
         /// </summary>
-        public int Delete(object key = null, object where = null, params object[] args)
+        public virtual int Delete(object key = null, object where = null, params object[] args)
         {
             return this.Database.Execute(this.CreateDeleteCommand(key, where, args));
         }
@@ -280,7 +280,7 @@ namespace Passive
         /// <summary>
         ///   Returns all records complying with the passed-in WHERE clause and arguments,  ordered as specified, limited (TOP) by limit.
         /// </summary>
-        public IEnumerable<dynamic> All(object where = null, string orderBy = "", int limit = 0, object columns = null,
+        public virtual IEnumerable<dynamic> All(object where = null, string orderBy = "", int limit = 0, object columns = null,
                                         params object[] args)
         {
             var sql = String.Format(limit > 0 ? "SELECT TOP " + limit + " {0} FROM {1}" : "SELECT {0} FROM {1}",
@@ -326,7 +326,7 @@ namespace Passive
         /// <summary>
         ///   Returns a single row from the database
         /// </summary>
-        public dynamic Single(object key = null, object where = null, object columns = null)
+        public virtual dynamic Single(object key = null, object where = null, object columns = null)
         {
             var sql = string.Format("SELECT {0} FROM {1}", GetColumns(columns), this.TableName);
             return this.Database.Fetch(this.BuildCommand(sql, key, where)).FirstOrDefault();
