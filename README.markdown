@@ -3,11 +3,13 @@ Passive is a Dynamic Data-access Framework
 
 How To Install It?
 ------------------
-Add a reference to the assembly and start using it!
+The easiest way is to use NuGet to install the package named "passive".
+
+    PM> install-package passive
 
 How Do You Use It?
 ------------------
-Passive is a simple "wrapper" for your DB tables and uses System.Dynamic extensively.
+Passive is a simple "wrapper" for your DB tables and uses `System.Dynamic` extensively.
 
  * Get a Database. Northwind will work nicely. Add a connection to your database in your web.config (or app.config). Don't forget the providerName! If you don't know what that is - just add providerName = 'System.Data.SqlClient' right after the whole connectionString stuff.
  * Create a class that wraps a table. You can call it whatever you like, but if you want to be cool just name it the same as your table.
