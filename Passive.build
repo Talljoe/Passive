@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--EXTERNAL_PROPERTIES: LOCAL_PACKAGE_PATH-->
+<project name="Passive" default="all">
+  <property name="packages.source.local" 
+            value="${environment::get-variable('LOCAL_PACKAGE_SOURCE')}"
+            if="${environment::variable-exists('LOCAL_PACKAGE_SOURCE')}" />
+  <property name="project.path" value="${project::get-base-directory()}" />
+  <property name="asminfo.filepath" value="${project.path}/Passive/AssemblyInfo.cs" />
+  <property name="dist.path" value="${project.path}/dist"/>
+  <property name="build.path" value="${project.path}/build"/>
+  <property name="build.debug" value="false" overwrite="false" />
+  <property name="build.defines" value="" overwrite="false" />
+  <property name="build.optimize" value="true" overwrite="false" />
+  <property name="tools.git.path" value="${project.path}/tools/git" />
+  <property name="tools.nuget.path" value="${project.path}/tools/nuget" />
+  <property name="build.version"
+            value="${version.major}.${version.minor}.${version.build}.${version.revision}"
+            dynamic="true"/>
+  <property name="build.assemblyversion" value="${version.major}.${version.minor}.0.0" dynamic="true"/>
+
+  <target name="passive" depends="init create-assembly-info">
+    <csc noconfig="true"
+         warnaserror="true"
+         target="library"
+         debug="${build.debug}"
+         optimize="${build.optimize}"
+         define="${build.defines}"
+         output="${build.path}/Passive.dll"
+         doc="${build.path}/Passive.xml"
+         keyfile="Passive.snk" >
+        <sources>
+          <include name="${asminfo.filepath}"/>
+          <include name="Passive/**/*.cs"/>
+        </sources>
+        <references>
+          <include name="mscorlib.dll"/>
+          <include name="Microsoft.CSharp.dll"/>
+          <include name="System.dll"/>
+          <include name="System.Core.dll"/>
+          <include name="System.Configuration.dll"/>
+          <include name="System.Data.dll"/>
+        </references>
+    </csc>
+  </target>
+  
+  <target name="all" depends="passive" />
+  <target name="dist" depends="rebuild build-nuget-package" />
+  <target name="rebuild" depends="clean build" />
+  <target name="build" depends="init all" />
+  <target name="publish" depends="get-git-revision">
+    <exec program="${tools.nuget.path}\nuget.exe" commandline="push ${dist.path}\Passive.${build.version}.nupkg" />
+  </target>
+
+  <target name="clean">
+    <delete dir="${dist.path}" if="${directory::exists(dist.path)}" />
+    <delete dir="${build.path}" if="${directory::exists(build.path)}" />
+  </target>
+  
+  <target name="init" depends="get-git-revision">
+    <mkdir dir="${dist.path}" unless="${directory::exists(dist.path)}" />
+    <mkdir dir="${build.path}" unless="${directory::exists(build.path)}" />
+  </target>
+
+  <target name="create-assembly-info" depends="get-git-revision">
+    <asminfo output="${asminfo.filepath}" language="CSharp">
+      <imports>
+        <import namespace="System"/>
+        <import namespace="System.Reflection"/>
+        <import namespace="System.Runtime.InteropServices"/>
+      </imports>
+      <attributes>
+        <attribute type="AssemblyProductAttribute" value="Passive: A 'Dynamic' Data-Access Framework" />
+        <attribute type="AssemblyCompanyAttribute" value="Tall Ambitions LLC" />
+        <attribute type="AssemblyCopyrightAttribute" value="Copyright © 2011 Joe Wasson, Rob Conery, and contributors" />
+        <attribute type="AssemblyVersionAttribute" value="${build.assemblyversion}" />
+        <attribute type="AssemblyFileVersionAttribute" value="${build.version}" />
+        <attribute type="ComVisibleAttribute" value="false" />
+        <attribute type="CLSCompliantAttribute" value="true" />
+      </attributes>
+    </asminfo>
+  </target>
+
+  <target name="build-nuget-package">
+    <xmlpoke file="Passive.nuspec"
+             xpath="//package/nu:metadata/nu:version"
+             value="${build.version}">
+      <namespaces>
+        <namespace prefix="xsi" uri="http://www.w3.org/2001/XMLSchema-instance" />
+        <namespace prefix="xsd" uri="http://www.w3.org/2001/XMLSchema" />
+        <namespace prefix="nu" uri="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd" />
+      </namespaces>
+    </xmlpoke>
+
+    <exec program="${tools.nuget.path}/nuget.exe"
+          commandline="pack Passive.nuspec /OutputDirectory ${dist.path}" />
+
+    <copy todir="${packages.source.local}" unless="${packages.source.local == ''}" flatten="true">
+      <fileset>
+        <include name="${dist.path}/*.nupkg" />
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="get-git-revision">
+    <property name="temp.revision.file" value="RevisionNr.tmp" />
+    <exec program="${tools.git.path}/git.exe"
+          commandline='describe --long'
+          failonerror="true"
+          output="${temp.revision.file}" />
+    <loadfile file="${temp.revision.file}" property="actual.git.revision" />
+    <regex pattern="(?&lt;gitmajor&gt;\d+)\.(?&lt;gitminor&gt;\d+)\.(\d+)\.(?&lt;gitbuild&gt;\d+)-(?&lt;gitrevisionnumber&gt;\d+)-.*"
+           input="${actual.git.revision}" />
+    <property name="version.major" value="${gitmajor}" overwrite="true" />
+    <property name="version.minor" value="${gitminor}" overwrite="true" />
+    <property name="version.build" value="${gitbuild}" overwrite="true" />
+    <property name="version.revision" value="${gitrevisionnumber}" overwrite="true" />
+    <delete file="${temp.revision.file}" failonerror="false" />
+  </target>
+</project>

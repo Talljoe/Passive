@@ -13,9 +13,21 @@ namespace Passive
     /// </summary>
     public class DynamicModel
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DynamicModel"/> class.
+        /// </summary>
+        /// <param name="connectionStringName">Name of the connection string.</param>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="primaryKeyField">The primary key field.</param>
         public DynamicModel(string connectionStringName = "", string tableName = "", string primaryKeyField = "")
             : this(new DynamicDatabase(connectionStringName), tableName, primaryKeyField) {}
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DynamicModel"/> class.
+        /// </summary>
+        /// <param name="database">The database.</param>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="primaryKeyField">The primary key field.</param>
         public DynamicModel(DynamicDatabase database, string tableName = "", string primaryKeyField = "")
         {
             this.Database = database ?? new DynamicDatabase();
@@ -122,7 +134,7 @@ namespace Passive
                 return new DynamicCommand
                            {
                                Sql = string.Format(stub, this.TableName, keys, vals),
-                               Args = items.Select(item => item.Value),
+                               Arguments = items.Select(item => item.Value),
                            };
             }
             throw new InvalidOperationException("Can't parse this object to the database - there are no properties set");
@@ -144,7 +156,7 @@ namespace Passive
                 return new DynamicCommand
                            {
                                Sql = string.Format(stub, this.TableName, keys, this.PrimaryKeyField, items.Count),
-                               Args = items.Select(item => item.Value).Concat(new[] {key}),
+                               Arguments = items.Select(item => item.Value).Concat(new[] {key}),
                            };
             }
             throw new InvalidOperationException("No parsable object was sent in - could not divine any name/value pairs");
@@ -231,14 +243,14 @@ namespace Passive
                 var whereRegex = new Regex(@"^where ", RegexOptions.IgnoreCase);
                 var keyword = whereRegex.IsMatch(sql.Trim()) ? " AND " : " WHERE ";
                 command.Sql += keyword + whereString.Replace(whereString.Trim(), String.Empty);
-                command.Args = (command.Args ?? Enumerable.Empty<object>()).Concat(args);
+                command.Arguments = (command.Arguments ?? Enumerable.Empty<object>()).Concat(args);
             }
             else
             {
                 var dict = where.ToDictionary();
                 command.Sql += " WHERE " +
                                String.Join(" AND ", dict.Select((kvp, i) => String.Format("{0} = @{1}", kvp.Key, i)));
-                command.Args = dict.Select(kvp => kvp.Value).ToArray();
+                command.Arguments = dict.Select(kvp => kvp.Value).ToArray();
             }
             return command;
         }

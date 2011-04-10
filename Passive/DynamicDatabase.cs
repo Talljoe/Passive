@@ -18,6 +18,10 @@ namespace Passive
         private readonly string _connectionString;
         private readonly DbProviderFactory _factory;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
+        /// </summary>
+        /// <param name="connectionStringName">Name of the connection string.</param>
         public DynamicDatabase(string connectionStringName = "")
         {
             if (connectionStringName == "")
@@ -48,7 +52,7 @@ namespace Passive
             result.Connection = connection;
             result.CommandText = command.Sql;
             result.Transaction = tx;
-            result.AddParams(command.Args);
+            result.AddParams(command.Arguments);
             return result;
         }
 
@@ -57,7 +61,7 @@ namespace Passive
         /// </summary>
         public IEnumerable<object> Query(string sql, params object[] args)
         {
-            return this.Query(new DynamicCommand {Sql = sql, Args = args,});
+            return this.Query(new DynamicCommand {Sql = sql, Arguments = args,});
         }
 
         /// <summary>
@@ -88,7 +92,7 @@ namespace Passive
         /// </summary>
         public IList<object> Fetch(string sql, params object[] args)
         {
-            return this.Fetch(new DynamicCommand {Sql = sql, Args = args,}).ToList();
+            return this.Fetch(new DynamicCommand {Sql = sql, Arguments = args,}).ToList();
         }
 
         /// <summary>
@@ -104,7 +108,7 @@ namespace Passive
         /// </summary>
         public object Scalar(string sql, params object[] args)
         {
-            return this.Scalar(new DynamicCommand {Sql = sql, Args = args,});
+            return this.Scalar(new DynamicCommand {Sql = sql, Arguments = args,});
         }
 
         /// <summary>
@@ -129,7 +133,7 @@ namespace Passive
         /// </summary>
         public int Execute(string sql, params object[] args)
         {
-            return this.Execute(new DynamicCommand {Sql = sql, Args = args,});
+            return this.Execute(new DynamicCommand {Sql = sql, Arguments = args,});
         }
 
         /// <summary>

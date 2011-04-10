@@ -10,6 +10,9 @@ namespace Passive
     using System.Dynamic;
     using System.Linq;
 
+    /// <summary>
+    /// Various extensions for objects.
+    /// </summary>
     public static class ObjectExtensions
     {
         /// <summary>

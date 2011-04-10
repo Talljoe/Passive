@@ -4,6 +4,9 @@ namespace Passive
 {
     using System;
 
+    /// <summary>
+    /// Attribute that ignores the column in Passive operations.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class ColumnIgnoreAttribute : Attribute {}
 }

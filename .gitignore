@@ -2,6 +2,8 @@ TestResults
 _ReSharper.*
 bin
 obj
+dist
+build
 *.suo
 *.user
 *.resharper

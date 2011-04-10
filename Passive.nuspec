@@ -1,10 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
-<package>
-  <metadata>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Passive</id>
     <title>Passive Data-Access Framework</title>
-    <version>0.1.0</version>
-    <authors>Joe Wasson</authors>
+    <version>0.1.0.0</version>
+    <authors>Joe Wasson, Rob Conery</authors>
+    <owners>Joe Wasson</owners>
     <summary>A "dynamic" data access framework.</summary>
     <description>
       A light-weight data-access framework based off of Rob Conery's Massive.  Framework support bare-metal access to SQL returning "dynamic" objects representing the results.
