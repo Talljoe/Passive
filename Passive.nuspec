@@ -8,7 +8,7 @@
     <owners>Joe Wasson</owners>
     <summary>A "dynamic" data access framework.</summary>
     <description>
-      A light-weight data-access framework based off of Rob Conery's Massive.  Framework support bare-metal access to SQL returning "dynamic" objects representing the results.
+      A light-weight data-access framework based off of Rob Conery's Massive.  Framework supports bare-metal access to SQL returning "dynamic" objects representing the results.
     </description>
     <tags>db data-acccess database talljoe sql .net40</tags>
     <language>en-US</language>
