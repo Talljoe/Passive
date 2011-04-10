@@ -6,7 +6,7 @@
     <version>0.1.0.0</version>
     <authors>Joe Wasson, Rob Conery</authors>
     <owners>Joe Wasson</owners>
-    <summary>A "dynamic" data access framework.</summary>
+    <summary>A "dynamic" data access framework for .NET 4.0.</summary>
     <description>
       A light-weight data-access framework based off of Rob Conery's Massive.  Framework supports bare-metal access to SQL returning "dynamic" objects representing the results.
     </description>
