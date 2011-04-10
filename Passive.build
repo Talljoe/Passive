@@ -8,7 +8,7 @@
   <property name="asminfo.filepath" value="${project.path}/Passive/AssemblyInfo.cs" />
   <property name="dist.path" value="${project.path}/dist"/>
   <property name="build.path" value="${project.path}/build"/>
-  <property name="build.debug" value="false" overwrite="false" />
+  <property name="build.debug" value="PDBOnly" overwrite="false" />
   <property name="build.defines" value="" overwrite="false" />
   <property name="build.optimize" value="true" overwrite="false" />
   <property name="tools.git.path" value="${project.path}/tools/git" />
@@ -42,9 +42,9 @@
         </references>
     </csc>
   </target>
-  
+
   <target name="all" depends="passive" />
-  <target name="dist" depends="rebuild build-nuget-package" />
+  <target name="dist" depends="rebuild build-nuget-package build-dist-zip" />
   <target name="rebuild" depends="clean build" />
   <target name="build" depends="init all" />
   <target name="publish" depends="get-git-revision">
@@ -55,7 +55,7 @@
     <delete dir="${dist.path}" if="${directory::exists(dist.path)}" />
     <delete dir="${build.path}" if="${directory::exists(build.path)}" />
   </target>
-  
+
   <target name="init" depends="get-git-revision">
     <mkdir dir="${dist.path}" unless="${directory::exists(dist.path)}" />
     <mkdir dir="${build.path}" unless="${directory::exists(build.path)}" />
@@ -100,7 +100,7 @@
       </fileset>
     </copy>
   </target>
-  
+
   <target name="get-git-revision">
     <property name="temp.revision.file" value="RevisionNr.tmp" />
     <exec program="${tools.git.path}/git.exe"
@@ -108,7 +108,7 @@
           failonerror="true"
           output="${temp.revision.file}" />
     <loadfile file="${temp.revision.file}" property="actual.git.revision" />
-    <regex pattern="(?&lt;gitmajor&gt;\d+)\.(?&lt;gitminor&gt;\d+)\.(\d+)\.(?&lt;gitbuild&gt;\d+)-(?&lt;gitrevisionnumber&gt;\d+)-.*"
+    <regex pattern="(?&lt;gitmajor&gt;\d+)\.(?&lt;gitminor&gt;\d+)\.(?&lt;gitbuild&gt;\d+)\.(\d+)-(?&lt;gitrevisionnumber&gt;\d+)-.*"
            input="${actual.git.revision}" />
     <property name="version.major" value="${gitmajor}" overwrite="true" />
     <property name="version.minor" value="${gitminor}" overwrite="true" />
@@ -116,4 +116,11 @@
     <property name="version.revision" value="${gitrevisionnumber}" overwrite="true" />
     <delete file="${temp.revision.file}" failonerror="false" />
   </target>
+
+  <target name="build-dist-zip">
+    <zip zipfile="${dist.path}/Passive.${build.version}.zip">
+      <fileset basedir="${build.path}">
+        <include name="*"  />
+      </fileset>
+    </zip>  </target>
 </project>

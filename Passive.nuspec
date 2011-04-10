@@ -3,7 +3,7 @@
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Passive</id>
     <title>Passive Data-Access Framework</title>
-    <version>0.1.0.0</version>
+    <version>0.1.1.0</version>
     <authors>Joe Wasson, Rob Conery</authors>
     <owners>Joe Wasson</owners>
     <summary>A "dynamic" data access framework for .NET 4.0.</summary>
@@ -16,6 +16,6 @@
     <projectUrl>https://github.com/Talljoe/Passive</projectUrl>
   </metadata>
   <files>
-    <file src="Passive\bin\Release\*.dll" target="lib\net40" />
+    <file src="build\*" target="lib\net40" />
   </files>
 </package>
