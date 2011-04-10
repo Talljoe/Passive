@@ -13,3 +13,4 @@ build
 *.yap
 .sass-cache
 /Deployment
+*.vs10x
