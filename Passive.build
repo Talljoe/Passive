@@ -52,13 +52,13 @@
   </target>
 
   <target name="clean">
-    <delete dir="${dist.path}" if="${directory::exists(dist.path)}" />
-    <delete dir="${build.path}" if="${directory::exists(build.path)}" />
+    <delete dir="${dist.path}" />
+    <delete dir="${build.path}" />
   </target>
 
   <target name="init" depends="get-git-revision">
-    <mkdir dir="${dist.path}" unless="${directory::exists(dist.path)}" />
-    <mkdir dir="${build.path}" unless="${directory::exists(build.path)}" />
+    <mkdir dir="${dist.path}" />
+    <mkdir dir="${build.path}" />
   </target>
 
   <target name="create-assembly-info" depends="get-git-revision">
@@ -80,7 +80,7 @@
     </asminfo>
   </target>
 
-  <target name="build-nuget-package">
+  <target name="build-nuget-package" depends="build">
     <xmlpoke file="Passive.nuspec"
              xpath="//package/nu:metadata/nu:version"
              value="${build.version}">
@@ -92,7 +92,7 @@
     </xmlpoke>
 
     <exec program="${tools.nuget.path}/nuget.exe"
-          commandline="pack Passive.nuspec /OutputDirectory ${dist.path}" />
+          commandline="pack Passive.nuspec /OutputDirectory ${dist.path} /Verbose" />
 
     <copy todir="${packages.source.local}" unless="${packages.source.local == ''}" flatten="true">
       <fileset>
@@ -114,10 +114,11 @@
     <property name="version.minor" value="${gitminor}" overwrite="true" />
     <property name="version.build" value="${gitbuild}" overwrite="true" />
     <property name="version.revision" value="${gitrevisionnumber}" overwrite="true" />
+    <echo message="Build number: ${build.version}" />
     <delete file="${temp.revision.file}" failonerror="false" />
   </target>
 
-  <target name="build-dist-zip">
+  <target name="build-dist-zip" depends="build">
     <zip zipfile="${dist.path}/Passive.${build.version}.zip">
       <fileset basedir="${build.path}">
         <include name="*"  />
