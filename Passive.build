@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--EXTERNAL_PROPERTIES: LOCAL_PACKAGE_PATH-->
+<!--EXTERNAL_PROPERTIES: LOCAL_PACKAGE_PATH;release.version-->
 <project name="Passive" default="all">
-  <property name="packages.source.local" 
+  <loadtasks assembly="tools/gitnub/Tall.Gitnub.Nant.dll" />
+
+  <property name="packages.source.local"
             value="${environment::get-variable('LOCAL_PACKAGE_SOURCE')}"
             if="${environment::variable-exists('LOCAL_PACKAGE_SOURCE')}" />
   <property name="project.path" value="${project::get-base-directory()}" />
@@ -13,10 +15,14 @@
   <property name="build.optimize" value="true" overwrite="false" />
   <property name="tools.git.path" value="${project.path}/tools/git" />
   <property name="tools.nuget.path" value="${project.path}/tools/nuget" />
+  <property name="tools.github-upload.path" value="${project.path}/tools/github-upload"/>
   <property name="build.version"
             value="${version.major}.${version.minor}.${version.build}.${version.revision}"
             dynamic="true"/>
   <property name="build.assemblyversion" value="${version.major}.${version.minor}.0.0" dynamic="true"/>
+
+  <property name="github.user" value="${git::readconfig('github.user')}" />
+  <property name="github.token" value="${git::readconfig('github.token')}" />
 
   <target name="passive" depends="init create-assembly-info">
     <csc noconfig="true"
@@ -47,8 +53,18 @@
   <target name="dist" depends="rebuild build-nuget-package build-dist-zip" />
   <target name="rebuild" depends="clean build" />
   <target name="build" depends="init all" />
-  <target name="publish" depends="get-git-revision">
+  <target name="publish" depends="dist get-git-revision">
     <exec program="${tools.nuget.path}\nuget.exe" commandline="push ${dist.path}\Passive.${build.version}.nupkg" />
+    <github-addfile filename="${dist.path}\Passive.${build.version}.nupkg"
+                    description="Passive Nuget package: v${build.version}"
+                    username="${github.user}"
+                    usertoken="${github.token}"
+                    repository="Talljoe/Passive" />
+    <github-addfile filename="${dist.path}\Passive.${build.version}.zip"
+                    description="Passive binaries: v${build.version}"
+                    username="${github.user}"
+                    usertoken="${github.token}"
+                    repository="Talljoe/Passive" />
   </target>
 
   <target name="clean">
@@ -62,6 +78,7 @@
   </target>
 
   <target name="create-assembly-info" depends="get-git-revision">
+    <echo message="Build number: ${build.version}" />
     <asminfo output="${asminfo.filepath}" language="CSharp">
       <imports>
         <import namespace="System"/>
@@ -104,24 +121,40 @@
   <target name="get-git-revision">
     <property name="temp.revision.file" value="RevisionNr.tmp" />
     <exec program="${tools.git.path}/git.exe"
-          commandline='describe --long'
+          commandline="describe --long"
           failonerror="true"
           output="${temp.revision.file}" />
     <loadfile file="${temp.revision.file}" property="actual.git.revision" />
-    <regex pattern="(?&lt;gitmajor&gt;\d+)\.(?&lt;gitminor&gt;\d+)\.(?&lt;gitbuild&gt;\d+)\.(\d+)-(?&lt;gitrevisionnumber&gt;\d+)-.*"
+    <regex pattern="(?'gitmajor'\d+)\.(?'gitminor'\d+)\.(?'gitbuild'\d+)\.(\d+)-(?'gitrevisionnumber'\d+)-.*"
            input="${actual.git.revision}" />
     <property name="version.major" value="${gitmajor}" overwrite="true" />
     <property name="version.minor" value="${gitminor}" overwrite="true" />
     <property name="version.build" value="${gitbuild}" overwrite="true" />
     <property name="version.revision" value="${gitrevisionnumber}" overwrite="true" />
-    <echo message="Build number: ${build.version}" />
     <delete file="${temp.revision.file}" failonerror="false" />
+  </target>
+
+  <target name="tag" depends="get-git-revision">
+    <fail if="${release.version == ''}"
+          message="Property 'release.version' is not set." />
+    <regex pattern="(?'relmajor'\d+)\.(?'relminor'\d+)\.(?'relbuild'\d+)\.(?'relrevision'\d+)"
+           input="${release.version}" />
+    <fail message="Version number ${release.version} should be greater than the current version number ${build.version}."
+          unless="${relmajor > version.major or
+                   (relmajor == version.major and
+                     (relminor > version.minor or
+                     (relminor == version.minor and relbuild > version.build)))}" />
+    <echo message="Tagging release with version ${release.version}" />
+    <exec program="${tools.git.path}/git.exe"
+          commandline='tag -a ${release.version} -m "Release ${release.version}"' />
+    <call target="get-git-revision" />
   </target>
 
   <target name="build-dist-zip" depends="build">
     <zip zipfile="${dist.path}/Passive.${build.version}.zip">
       <fileset basedir="${build.path}">
-        <include name="*"  />
+        <include name="*" />
       </fileset>
-    </zip>  </target>
+    </zip>
+  </target>
 </project>

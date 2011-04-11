@@ -38,6 +38,7 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="ColumnIgnoreAttribute.cs" />
     <Compile Include="ColumnNameAttribute.cs" />
     <Compile Include="DynamicCommand.cs" />
