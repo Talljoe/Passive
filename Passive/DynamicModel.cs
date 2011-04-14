@@ -28,7 +28,7 @@ namespace Passive
         /// <param name="database">The database.</param>
         /// <param name="tableName">Name of the table.</param>
         /// <param name="primaryKeyField">The primary key field.</param>
-        public DynamicModel(DynamicDatabase database, string tableName = "", string primaryKeyField = "")
+        public DynamicModel(IDynamicDatabase database, string tableName = "", string primaryKeyField = "")
         {
             this.Database = database ?? new DynamicDatabase();
             this.TableName = tableName == "" ? this.GetType().Name : tableName;
@@ -38,7 +38,7 @@ namespace Passive
         /// <summary>
         ///   Gets the database for this model.
         /// </summary>
-        public DynamicDatabase Database { get; private set; }
+        public IDynamicDatabase Database { get; private set; }
 
         /// <summary>
         ///   Gets or sets the primary key for this model.

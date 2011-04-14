@@ -43,7 +43,9 @@
     <Compile Include="ColumnNameAttribute.cs" />
     <Compile Include="DynamicCommand.cs" />
     <Compile Include="DynamicDatabase.cs" />
+    <Compile Include="DynamicDatabaseT.cs" />
     <Compile Include="DynamicModel.cs" />
+    <Compile Include="IDynamicDatabase.cs" />
     <Compile Include="ObjectExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
