@@ -4,8 +4,13 @@
   <loadtasks assembly="tools/gitnub/Tall.Gitnub.Nant.dll" />
 
   <property name="packages.source.local"
+            value=""
+            unless="${environment::variable-exists('LOCAL_PACKAGE_SOURCE')}"
+            overwrite="false" />
+  <property name="packages.source.local"
             value="${environment::get-variable('LOCAL_PACKAGE_SOURCE')}"
-            if="${environment::variable-exists('LOCAL_PACKAGE_SOURCE')}" />
+            if="${environment::variable-exists('LOCAL_PACKAGE_SOURCE')}"
+            overwrite="false" />
   <property name="project.path" value="${project::get-base-directory()}" />
   <property name="asminfo.filepath" value="${project.path}/Passive/AssemblyInfo.cs" />
   <property name="dist.path" value="${project.path}/dist"/>
