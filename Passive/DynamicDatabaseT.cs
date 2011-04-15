@@ -13,7 +13,8 @@ namespace Passive
     /// <summary>
     ///   A class that wraps your database in Dynamic Funtime
     /// </summary>
-    public class DynamicDatabase<TFactory, TConnection, TCommand> : IDynamicDatabase where TFactory : DbProviderFactory
+    public class DynamicDatabase<TFactory, TConnection, TCommand> : IDynamicDatabase
+        where TFactory : DbProviderFactory
         where TConnection : DbConnection
         where TCommand : DbCommand
     {
@@ -24,11 +25,11 @@ namespace Passive
         /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
         /// </summary>
         /// <param name="connectionStringName">Name of the connection string.</param>
-        public DynamicDatabase(string connectionStringName = "")
+        public DynamicDatabase(string connectionStringName = null)
         {
-            if (connectionStringName == "")
+            if (String.IsNullOrEmpty(connectionStringName))
             {
-                connectionStringName = ConfigurationManager.ConnectionStrings[0].Name;
+                connectionStringName =  ConfigurationManager.ConnectionStrings[0].Name;
             }
             var _providerName = "System.Data.SqlClient";
             if (ConfigurationManager.ConnectionStrings[connectionStringName] != null)
@@ -86,12 +87,7 @@ namespace Passive
                     {
                         while (rdr.Read())
                         {
-                            var d = (IDictionary<string, object>) new ExpandoObject();
-                            for (var i = 0; i < rdr.FieldCount; i++)
-                            {
-                                d.Add(rdr.GetName(i), rdr[i]);
-                            }
-                            yield return d;
+                            yield return GetRow(rdr);
                         }
                     }
                 }
@@ -128,7 +124,9 @@ namespace Passive
         public object Scalar(DynamicCommand command)
         {
             using (var conn = this.OpenConnection())
+            {
                 return this.CreateDbCommand(command, connection: conn).ExecuteScalar();
+            }
         }
 
         /// <summary>
@@ -191,6 +189,21 @@ namespace Passive
             conn.ConnectionString = this._connectionString;
             conn.Open();
             return (TConnection)conn;
+        }
+
+        /// <summary>
+        /// Gets a row from the current location of DbDataReader.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <returns></returns>
+        protected dynamic GetRow(DbDataReader reader)
+        {
+            var d = (IDictionary<string, object>)new ExpandoObject();
+            for (var i = 0; i < reader.FieldCount; i++)
+            {
+                d.Add(reader.GetName(i), reader[i]);
+            }
+            return d;
         }
     }
 }

@@ -12,12 +12,7 @@ namespace Passive
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
         /// </summary>
-        public DynamicDatabase() : this(null) {}
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
-        /// </summary>
         /// <param name="connectionStringName">Name of the connection string.</param>
-        public DynamicDatabase(string connectionStringName) : base(connectionStringName) {}
+        public DynamicDatabase(string connectionStringName = null) : base(connectionStringName) {}
     }
 }

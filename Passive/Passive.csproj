@@ -41,12 +41,15 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="ColumnIgnoreAttribute.cs" />
     <Compile Include="ColumnNameAttribute.cs" />
+    <Compile Include="Async\DynamicAsyncDatabaseT.cs" />
     <Compile Include="DynamicCommand.cs" />
     <Compile Include="DynamicDatabase.cs" />
     <Compile Include="DynamicDatabaseT.cs" />
     <Compile Include="DynamicModel.cs" />
+    <Compile Include="Async\IDynamicAsyncDatabase.cs" />
     <Compile Include="IDynamicDatabase.cs" />
     <Compile Include="ObjectExtensions.cs" />
+    <Compile Include="Async\SqlDynamicAsyncDatabase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
