@@ -19,7 +19,7 @@ namespace Passive
         /// <param name="connectionStringName">Name of the connection string.</param>
         /// <param name="tableName">Name of the table.</param>
         /// <param name="primaryKeyField">The primary key field.</param>
-        public DynamicModel(string connectionStringName = "", string tableName = "", string primaryKeyField = "")
+        public DynamicModel(string connectionStringName = null, string tableName = null, string primaryKeyField = null)
             : this(new DynamicDatabase(connectionStringName), tableName, primaryKeyField) {}
 
         /// <summary>
@@ -28,11 +28,11 @@ namespace Passive
         /// <param name="database">The database.</param>
         /// <param name="tableName">Name of the table.</param>
         /// <param name="primaryKeyField">The primary key field.</param>
-        public DynamicModel(IDynamicDatabase database, string tableName = "", string primaryKeyField = "")
+        public DynamicModel(IDynamicDatabase database, string tableName = null, string primaryKeyField = null)
         {
             this.Database = database ?? new DynamicDatabase();
-            this.TableName = tableName == "" ? this.GetType().Name : tableName;
-            this.PrimaryKeyField = string.IsNullOrEmpty(primaryKeyField) ? "ID" : primaryKeyField;
+            this.TableName = String.IsNullOrEmpty(tableName) ? this.GetType().Name : tableName;
+            this.PrimaryKeyField = String.IsNullOrEmpty(primaryKeyField) ? "ID" : primaryKeyField;
         }
 
         /// <summary>
@@ -43,12 +43,12 @@ namespace Passive
         /// <summary>
         ///   Gets or sets the primary key for this model.
         /// </summary>
-        public string PrimaryKeyField { get; set; }
+        public string PrimaryKeyField { get; private set; }
 
         /// <summary>
         ///   Gets or sets the table name for this model.
         /// </summary>
-        public string TableName { get; set; }
+        public string TableName { get; private set; }
 
         /// <summary>
         ///   Builds a set of Insert and Update commands based on the passed-on objects.
