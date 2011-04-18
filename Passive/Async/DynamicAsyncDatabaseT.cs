@@ -30,6 +30,27 @@ namespace Passive.Async
         /// Asynchronously runs a query against the database.
         /// </summary>
         /// <returns></returns>
+        public Task<IEnumerable<object>> QueryAsync(string sql, params object[] args)
+        {
+            return this.FetchAsync(new DynamicCommand { Sql = sql, Arguments = args, });
+        }
+
+        /// <summary>
+        /// Asynchronously runs a query against the database.
+        /// </summary>
+        /// <returns></returns>
+        public Task<IEnumerable<object>> QueryAsync(DynamicCommand command)
+        {
+            var connection = this.OpenConnection();
+            var dbCommand = this.CreateDbCommand(command, connection: connection);
+            return this.GetExecuteReaderTask(dbCommand, CommandBehavior.CloseConnection)
+                       .ContinueWith(r => this.Enumerate(connection, dbCommand, r.Result));
+        }
+
+        /// <summary>
+        /// Asynchronously runs a query against the database.
+        /// </summary>
+        /// <returns></returns>
         public Task<IEnumerable<object>> FetchAsync(string sql, params object[] args)
         {
             return this.FetchAsync(new DynamicCommand { Sql = sql, Arguments = args, });
@@ -41,23 +62,7 @@ namespace Passive.Async
         /// <returns></returns>
         public Task<IEnumerable<object>> FetchAsync(DynamicCommand command)
         {
-            var connection = this.OpenConnection();
-            var dbCommand = this.CreateDbCommand(command, connection: connection);
-            var task = this.GetExecuteReaderTask(dbCommand, CommandBehavior.CloseConnection)
-                .ContinueWith(r =>
-                {
-                    using (dbCommand)
-                    {
-                        var result = new List<object>();
-                        var reader = r.Result;
-                        while (reader.Read())
-                        {
-                            result.Add(this.GetRow(reader));
-                        }
-                        return result.AsEnumerable();
-                    }
-                });
-            return task;
+            return this.QueryAsync(command).ContinueWith(t => (IEnumerable<dynamic>)t.Result.ToList());
         }
 
         /// <summary>
@@ -139,5 +144,17 @@ namespace Passive.Async
         /// Gets the task for executing a non-query.
         /// </summary>
         protected abstract Task<int> GetExecuteNonQueryTask(TCommand command);
+
+        private IEnumerable<dynamic> Enumerate(TConnection connection, TCommand command, DbDataReader reader)
+        {
+            using(connection)
+            using (command)
+            {
+                while (reader.Read())
+                {
+                    yield return this.GetRow(reader);
+                }
+            }
+        }
     }
 }

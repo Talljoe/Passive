@@ -51,5 +51,17 @@ namespace Passive.Async
         ///   Executes a series of commands optionally in a transaction
         /// </summary>
         Task<int> ExecuteAsync(IEnumerable<DynamicCommand> commands, bool transaction = false);
+
+        /// <summary>
+        /// Asynchronously runs a query against the database.
+        /// </summary>
+        /// <returns></returns>
+        Task<IEnumerable<object>> QueryAsync(string sql, params object[] args);
+
+        /// <summary>
+        /// Asynchronously runs a query against the database.
+        /// </summary>
+        /// <returns></returns>
+        Task<IEnumerable<object>> QueryAsync(DynamicCommand command);
     }
 }

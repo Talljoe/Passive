@@ -43,7 +43,7 @@ namespace Passive.Async
         public virtual Task<IEnumerable<dynamic>> AllAsync(object where = null, string orderBy = "",
                                                            int limit = 0, object columns = null, params object[] args)
         {
-            return this.DoAll(where, orderBy, limit, columns, args, command => this.Database.FetchAsync(command));
+            return this.DoAll(where, orderBy, limit, columns, args, command => this.Database.QueryAsync(command));
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace Passive.Async
                                 (count, query) =>
                                 {
                                     var totalRecordsTask = this.Database.ScalarAsync(count).ContinueWith(t => (int)t.Result);
-                                    var itemsTask = this.Database.FetchAsync(query);
+                                    var itemsTask = this.Database.QueryAsync(query);
                                     return Task<dynamic>.Factory.ContinueWhenAll(
                                         new Task[] {totalRecordsTask, itemsTask},
                                         t => this.GetPagedResult(currentPage, pageSize, totalRecordsTask.Result, itemsTask.Result));
