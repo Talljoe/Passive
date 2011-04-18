@@ -295,6 +295,42 @@ namespace Passive
         public virtual IEnumerable<dynamic> All(object where = null, string orderBy = "", int limit = 0, object columns = null,
                                         params object[] args)
         {
+            return this.DoAll(where, orderBy, limit, columns, args, command => this.Database.Query(command));
+        }
+
+        /// <summary>
+        ///   Returns a dynamic PagedResult. Result properties are Items, CurrentPage, TotalPages, and TotalRecords.
+        /// </summary>
+        public virtual dynamic Paged(object where = null, string orderBy = "", object columns = null, int pageSize = 20,
+                             int currentPage = 1, params object[] args)
+        {
+            return this.DoPaged(where, orderBy, columns, pageSize, currentPage, args,
+                                (count, query) => this.GetPagedResult(currentPage, pageSize,
+                                    (int) this.Database.Scalar(count), this.Database.Query(query)));
+        }
+
+        /// <summary>
+        ///   Returns a single row from the database
+        /// </summary>
+        public virtual dynamic Single(object key = null, object where = null, object columns = null)
+        {
+            return this.DoSingle(key, where, columns, command => this.Database.Query(command).FirstOrDefault());
+        }
+
+        /// <summary>
+        ///   Does the work for fetching a single item.
+        /// </summary>
+        protected virtual T DoSingle<T>(object key, object where, object columns, Func<DynamicCommand, T> work)
+        {
+            var sql = string.Format("SELECT {0} FROM {1}", GetColumns(columns), this.TableName);
+            return work(this.BuildCommand(sql, key, where));
+        }
+
+        /// <summary>
+        ///   Does the work for getting all items.
+        /// </summary>
+        protected virtual T DoAll<T>(object where, string orderBy, int limit, object columns, object[] args, Func<DynamicCommand, T> work)
+        {
             var sql = String.Format(limit > 0 ? "SELECT TOP " + limit + " {0} FROM {1}" : "SELECT {0} FROM {1}",
                                     GetColumns(columns), this.TableName);
             var command = this.BuildCommand(sql, where: where, args: args);
@@ -304,14 +340,14 @@ namespace Passive
                                     ? " "
                                     : " ORDER BY ") + orderBy;
             }
-            return this.Database.Query(command);
+            return work(command);
         }
 
         /// <summary>
-        ///   Returns a dynamic PagedResult. Result properties are Items, TotalPages, and TotalRecords.
+        ///   Does the work for executing a paged result.
         /// </summary>
-        public dynamic Paged(object where = null, string orderBy = "", object columns = null, int pageSize = 20,
-                             int currentPage = 1, params object[] args)
+        protected virtual dynamic DoPaged(object where, string orderBy, object columns, int pageSize,
+                         int currentPage, object[] args, Func<DynamicCommand, DynamicCommand, dynamic> work)
         {
             var countSql = string.Format("SELECT COUNT({0}) FROM {1}", this.PrimaryKeyField, this.TableName);
             if (String.IsNullOrEmpty(orderBy))
@@ -321,27 +357,25 @@ namespace Passive
             var sql =
                 string.Format("SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY {1}) AS Row, {0} FROM {2}) AS Paged",
                               GetColumns(columns), orderBy, this.TableName);
-            var pageStart = (currentPage - 1)*pageSize;
+            var pageStart = (currentPage - 1) * pageSize;
             sql += string.Format(" WHERE Row >={0} AND Row <={1}", pageStart, (pageStart + pageSize));
             var queryCommand = this.BuildCommand(sql, where: where, args: args);
             var whereCommand = this.BuildCommand(countSql, where: where, args: args);
-            var totalRecords = (int) this.Database.Scalar(whereCommand);
-            return new
-                       {
-                           CurrentPage = currentPage,
-                           TotalRecords = totalRecords,
-                           TotalPages = (totalRecords + (pageSize - 1))/pageSize,
-                           Items = this.Database.Query(queryCommand)
-                       }.ToExpando();
+            return work(whereCommand, queryCommand);
         }
 
         /// <summary>
-        ///   Returns a single row from the database
+        ///   Gets the result for a paged query.
         /// </summary>
-        public virtual dynamic Single(object key = null, object where = null, object columns = null)
+        protected virtual dynamic GetPagedResult(int currentPage, int pageSize, int totalRecords, IEnumerable<dynamic> items)
         {
-            var sql = string.Format("SELECT {0} FROM {1}", GetColumns(columns), this.TableName);
-            return this.Database.Fetch(this.BuildCommand(sql, key, where)).FirstOrDefault();
+            return new
+            {
+                CurrentPage = currentPage,
+                TotalRecords = totalRecords,
+                TotalPages = (totalRecords + (pageSize - 1)) / pageSize,
+                Items = items
+            }.ToExpando();
         }
     }
 }

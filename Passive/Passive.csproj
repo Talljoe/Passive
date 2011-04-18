@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Async\DynamicAsyncModel.cs" />
     <Compile Include="ColumnIgnoreAttribute.cs" />
     <Compile Include="ColumnNameAttribute.cs" />
     <Compile Include="Async\DynamicAsyncDatabaseT.cs" />
