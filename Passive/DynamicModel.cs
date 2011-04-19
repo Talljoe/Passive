@@ -367,7 +367,7 @@ namespace Passive
         /// <summary>
         ///   Gets the result for a paged query.
         /// </summary>
-        protected virtual dynamic GetPagedResult(int currentPage, int pageSize, int totalRecords, IEnumerable<dynamic> items)
+        protected virtual dynamic GetPagedResult<T>(int currentPage, int pageSize, int totalRecords, T items)
         {
             return new
             {

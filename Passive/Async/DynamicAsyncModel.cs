@@ -40,7 +40,7 @@ namespace Passive.Async
         /// <summary>
         ///   Returns all records complying with the passed-in WHERE clause and arguments,  ordered as specified, limited (TOP) by limit.
         /// </summary>
-        public virtual Task<IEnumerable<dynamic>> AllAsync(object where = null, string orderBy = "",
+        public virtual IAsyncEnumerable<dynamic> AllAsync(object where = null, string orderBy = "",
                                                            int limit = 0, object columns = null, params object[] args)
         {
             return this.DoAll(where, orderBy, limit, columns, args, command => this.Database.QueryAsync(command));
@@ -53,13 +53,12 @@ namespace Passive.Async
                              int currentPage = 1, params object[] args)
         {
             return this.DoPaged(where, orderBy, columns, pageSize, currentPage, args,
-                                (count, query) =>
+                                (countQuery, query) =>
                                 {
-                                    var totalRecordsTask = this.Database.ScalarAsync(count).ContinueWith(t => (int)t.Result);
-                                    var itemsTask = this.Database.QueryAsync(query);
-                                    return Task<dynamic>.Factory.ContinueWhenAll(
-                                        new Task[] {totalRecordsTask, itemsTask},
-                                        t => this.GetPagedResult(currentPage, pageSize, totalRecordsTask.Result, itemsTask.Result));
+                                    var items = this.Database.QueryAsync(query);
+                                    return this.Database.ScalarAsync(countQuery)
+                                        .Select(result => (int)result)
+                                        .Select(count => this.GetPagedResult(currentPage, pageSize, count, items));
 
                                 });
         }
@@ -69,8 +68,8 @@ namespace Passive.Async
         /// </summary>
         public virtual Task<dynamic> SingleAsync(object key = null, object where = null, object columns = null)
         {
-            return this.DoSingle(key, where, columns,
-                command => this.Database.FetchAsync(command).ContinueWith(t => t.Result.FirstOrDefault()));
+            return this.DoSingle(key, where, columns, 
+                command => this.Database.FetchAsync(command).Select(result => result.FirstOrDefault()));
         }
     }
 }

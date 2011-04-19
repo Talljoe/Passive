@@ -56,12 +56,12 @@ namespace Passive.Async
         /// Asynchronously runs a query against the database.
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<object>> QueryAsync(string sql, params object[] args);
+        IAsyncEnumerable<object> QueryAsync(string sql, params object[] args);
 
         /// <summary>
         /// Asynchronously runs a query against the database.
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<object>> QueryAsync(DynamicCommand command);
+        IAsyncEnumerable<object> QueryAsync(DynamicCommand command);
     }
 }

@@ -5,6 +5,7 @@ namespace Passive.Async
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
+    using System.Disposables;
     using System.Threading.Tasks;
     using System.Linq;
 
@@ -30,21 +31,18 @@ namespace Passive.Async
         /// Asynchronously runs a query against the database.
         /// </summary>
         /// <returns></returns>
-        public Task<IEnumerable<object>> QueryAsync(string sql, params object[] args)
+        public IAsyncEnumerable<object> QueryAsync(string sql, params object[] args)
         {
-            return this.FetchAsync(new DynamicCommand { Sql = sql, Arguments = args, });
+            return this.QueryAsync(new DynamicCommand { Sql = sql, Arguments = args, });
         }
 
         /// <summary>
         /// Asynchronously runs a query against the database.
         /// </summary>
         /// <returns></returns>
-        public Task<IEnumerable<object>> QueryAsync(DynamicCommand command)
+        public IAsyncEnumerable<object> QueryAsync(DynamicCommand command)
         {
-            var connection = this.OpenConnection();
-            var dbCommand = this.CreateDbCommand(command, connection: connection);
-            return this.GetExecuteReaderTask(dbCommand, CommandBehavior.CloseConnection)
-                       .ContinueWith(r => this.Enumerate(connection, dbCommand, r.Result));
+            return new AsyncQuery(this, command);
         }
 
         /// <summary>
@@ -62,7 +60,9 @@ namespace Passive.Async
         /// <returns></returns>
         public Task<IEnumerable<object>> FetchAsync(DynamicCommand command)
         {
-            return this.QueryAsync(command).ContinueWith(t => (IEnumerable<dynamic>)t.Result.ToList());
+            return this.QueryAsync(command)
+                       .ToList()
+                       .Select(l => l.AsEnumerable());
         }
 
         /// <summary>
@@ -70,11 +70,12 @@ namespace Passive.Async
         /// </summary>
         public Task<object> ScalarAsync(DynamicCommand command)
         {
-            var connection = this.OpenConnection();
-            var dbCommand = this.CreateDbCommand(command, connection: connection);
-            var task = this.GetExecuteScalarTask(dbCommand);
-            task.ContinueWith(_ => connection.Close());
-            return task;
+            return TaskHelpers.Using(this.OpenConnection(),
+                                     connection =>
+                                         {
+                                             var dbCommand = this.CreateDbCommand(command, connection: connection);
+                                             return this.GetExecuteScalarTask(dbCommand).Finally(dbCommand.Dispose);
+                                         });
         }
 
         /// <summary>
@@ -106,7 +107,7 @@ namespace Passive.Async
         /// </summary>
         public Task<int> ExecuteAsync(params DynamicCommand[] commands)
         {
-            return this.ExecuteAsync(commands, transaction: false);
+            return this.ExecuteAsync(commands);
         }
 
         /// <summary>
@@ -114,20 +115,34 @@ namespace Passive.Async
         /// </summary>
         public Task<int> ExecuteAsync(IEnumerable<DynamicCommand> commands, bool transaction = false)
         {
-            var connection = this.OpenConnection();
-            var tx = (transaction) ? connection.BeginTransaction() : null;
-            var tasks = commands
-                .Select(cmd => this.CreateDbCommand(cmd, tx, connection))
-                .Select(this.GetExecuteNonQueryTask)
-                .ToArray();
+            return TaskHelpers.Using(
+                new CompositeDisposable(),
+                disposable =>
+                    {
+                        var connection = this.OpenConnection();
+                        disposable.Add(connection);
+                        DbTransaction tx = null;
+                        if (transaction)
+                        {
+                            tx = connection.BeginTransaction();
+                            disposable.Add(tx);
+                        }
 
-            var result = Task<int>.Factory.ContinueWhenAll(tasks, _ => tasks.Sum(t => t.Result));
+                        var tasks = commands
+                            .Select(cmd => this.CreateDbCommand(cmd, tx, connection))
+                            .Do(disposable.Add)
+                            .Select(this.GetExecuteNonQueryTask)
+                            .ToArray();
 
-            if (tx != null)
-            {
-                result.ContinueWith(_ => tx.Commit());
-            }
-            return result;
+                        var result = Task<int>.Factory.ContinueWhenAll(tasks, _ => tasks.Sum(t => t.Result));
+
+                        if (tx != null)
+                        {
+                            result = result.Do(_ => tx.Commit());
+                        }
+
+                        return result;
+                    });
         }
 
         /// <summary>
@@ -145,14 +160,74 @@ namespace Passive.Async
         /// </summary>
         protected abstract Task<int> GetExecuteNonQueryTask(TCommand command);
 
-        private IEnumerable<dynamic> Enumerate(TConnection connection, TCommand command, DbDataReader reader)
+        private class AsyncQuery : IAsyncEnumerable<object>
         {
-            using(connection)
-            using (command)
+            private readonly DynamicAsyncDatabase<TFactory, TConnection, TCommand> database;
+            private readonly DynamicCommand command;
+
+            public AsyncQuery(DynamicAsyncDatabase<TFactory, TConnection, TCommand> database, DynamicCommand command)
             {
-                while (reader.Read())
+                this.database = database;
+                this.command = command;
+            }
+
+            public IAsyncEnumerator<object> GetEnumerator()
+            {
+                return new QueryEnumerator(database, this.command);
+            }
+
+            private class QueryEnumerator : IAsyncEnumerator<object>
+            {
+                private readonly CompositeDisposable disposable = new CompositeDisposable();
+
+                private readonly DynamicAsyncDatabase<TFactory, TConnection, TCommand> database;
+                private readonly DynamicCommand command;
+                private DbDataReader reader;
+
+                public QueryEnumerator(DynamicAsyncDatabase<TFactory, TConnection, TCommand> database, DynamicCommand command)
                 {
-                    yield return this.GetRow(reader);
+                    this.database = database;
+                    this.command = command;
+                }
+
+                public void Dispose()
+                {
+                    disposable.Dispose();
+                }
+
+                public Task<bool> MoveNext()
+                {
+                    Task<bool> task;
+                    if (reader == null)
+                    {
+                        var readerTask = this.GetReader();
+                        task = readerTask.Select(
+                            result =>
+                                {
+                                    this.reader = result;
+                                    this.disposable.Add(this.reader);
+                                    return this.reader.Read();
+                                });
+                    }
+                    else
+                    {
+                        task = Task<bool>.Factory.StartNew(reader.Read);
+                    }
+
+                    return task.Do(() => { this.Current = database.GetRow(this.reader); });
+                }
+
+                public object Current { get; private set; }
+
+                private Task<DbDataReader> GetReader()
+                {
+                    var connection = this.database.OpenConnection();
+                    this.disposable.Add(connection);
+                    var dbCommand = this.database.CreateDbCommand(this.command, connection: connection);
+                    this.disposable.Add(dbCommand);
+
+                    return this.database.GetExecuteReaderTask(dbCommand, CommandBehavior.CloseConnection)
+                                        .Do(r => this.disposable.Add(r));
                 }
             }
         }

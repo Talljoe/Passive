@@ -150,7 +150,7 @@ namespace Passive
         /// </summary>
         public int Execute(params DynamicCommand[] commands)
         {
-            return this.Execute(commands, transaction: false);
+            return this.Execute(commands);
         }
 
         /// <summary>
