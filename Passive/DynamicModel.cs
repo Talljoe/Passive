@@ -240,9 +240,8 @@ namespace Passive
             var whereString = where as string;
             if (whereString != null)
             {
-                var whereRegex = new Regex(@"^where ", RegexOptions.IgnoreCase);
-                var keyword = whereRegex.IsMatch(sql.Trim()) ? " AND " : " WHERE ";
-                command.Sql += keyword + whereString.Replace(whereString.Trim(), String.Empty);
+                var keyword = Regex.IsMatch(sql, " WHERE ", RegexOptions.IgnoreCase) ? " AND " : " WHERE ";
+                command.Sql += keyword + Regex.Replace(whereString.Trim(), @"^where ", String.Empty, RegexOptions.IgnoreCase);
                 command.Arguments = (command.Arguments ?? Enumerable.Empty<object>()).Concat(args);
             }
             else

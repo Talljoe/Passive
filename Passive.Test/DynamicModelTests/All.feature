@@ -17,9 +17,19 @@ Scenario: Getting all records
   When I ask for all rows
   Then I should get all items
 
-
 Scenario: Getting some records
   Given I have a model for Appliance
   When I ask for 2 rows
   Then I should only have 2 results
   And they should be a subset of all data
+
+Scenario: Asking for too many records
+  Given I have a model for Appliance
+  When I ask for more rows than are in the database
+  Then I should get all items
+
+Scenario: Filtering records by string
+  Given I have a model for Appliance
+  When I ask for appliances colored White
+  Then I should only have 2 results
+  And I should only get White-colored appliances

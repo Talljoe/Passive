@@ -27,7 +27,8 @@ namespace Passive.Test.DynamicModelTests
         public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "DynamicModel All", "In order to access data\nAs a developer\nI want to get all rows from the database", GenerationTargetLanguage.CSharp, ((string[])(null)));
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "DynamicModel All", "In order to access data\r\nAs a developer\r\nI want to get all rows from the database" +
+                    "", GenerationTargetLanguage.CSharp, ((string[])(null)));
             testRunner.OnFeatureStart(featureInfo);
         }
         
@@ -115,16 +116,54 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void GettingSomeRecords()
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Getting some records", ((string[])(null)));
-#line 21
+#line 20
 this.ScenarioSetup(scenarioInfo);
-#line 22
+#line 21
   testRunner.Given("I have a model for Appliance");
-#line 23
+#line 22
   testRunner.When("I ask for 2 rows");
-#line 24
+#line 23
   testRunner.Then("I should only have 2 results");
-#line 25
+#line 24
   testRunner.And("they should be a subset of all data");
+#line hidden
+            testRunner.CollectScenarioErrors();
+        }
+        
+        [Xunit.FactAttribute()]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All")]
+        [Xunit.TraitAttribute("Description", "Asking for too many records")]
+        public virtual void AskingForTooManyRecords()
+        {
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Asking for too many records", ((string[])(null)));
+#line 26
+this.ScenarioSetup(scenarioInfo);
+#line 27
+  testRunner.Given("I have a model for Appliance");
+#line 28
+  testRunner.When("I ask for more rows than are in the database");
+#line 29
+  testRunner.Then("I should get all items");
+#line hidden
+            testRunner.CollectScenarioErrors();
+        }
+        
+        [Xunit.FactAttribute()]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All")]
+        [Xunit.TraitAttribute("Description", "Filtering records by string")]
+        public virtual void FilteringRecordsByString()
+        {
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Filtering records by string", ((string[])(null)));
+#line 31
+this.ScenarioSetup(scenarioInfo);
+#line 32
+  testRunner.Given("I have a model for Appliance");
+#line 33
+  testRunner.When("I ask for appliances colored White");
+#line 34
+  testRunner.Then("I should only have 2 results");
+#line 35
+  testRunner.And("I should only get White-colored appliances");
 #line hidden
             testRunner.CollectScenarioErrors();
         }
