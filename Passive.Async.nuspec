@@ -2,20 +2,25 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Passive</id>
-    <title>Passive Data-Access Framework</title>
+    <title>Passive Data-Access Framework with Async Support</title>
     <version>0.1.1.0</version>
     <authors>Joe Wasson, Rob Conery</authors>
     <owners>Joe Wasson</owners>
     <summary>A "dynamic" data access framework for .NET 4.0.</summary>
     <description>
-      A light-weight data-access framework based off of Rob Conery's Massive.  Framework supports bare-metal access to SQL returning "dynamic" objects representing the results.
+      A light-weight data-access framework based off of Rob Conery's Massive.  Framework supports bare-metal access to SQL returning "dynamic" objects representing the results. This version include support for asynchronous queries.
     </description>
-    <tags>db data-acccess database talljoe sql .net40</tags>
+    <tags>db data-acccess database talljoe sql .net40 async</tags>
     <language>en-US</language>
     <licenseUrl>https://github.com/Talljoe/Passive/raw/master/LICENSE.txt</licenseUrl>
     <projectUrl>https://github.com/Talljoe/Passive</projectUrl>
   </metadata>
   <files>
-    <file src="build\Passive\*" target="lib\net40" />
+    <file src="build\Passive.Async\*" target="lib\net40" />
   </files>
+  <dependencies>
+    <dependency id="Rx-Core" version="1.0.0.0" />
+    <dependency id="Rx-Interactive" version="1.0.0.0" />
+    <dependency id="Rx-AsyncLinq" version="1.0.0.0" />
+  </dependencies>
 </package>

@@ -3,17 +3,9 @@
 <project name="Passive" default="all">
   <loadtasks assembly="tools/gitnub/Tall.Gitnub.Nant.dll" />
 
-  <property name="packages.source.local"
-            value=""
-            unless="${environment::variable-exists('LOCAL_PACKAGE_SOURCE')}"
-            overwrite="false" />
-  <property name="packages.source.local"
-            value="${environment::get-variable('LOCAL_PACKAGE_SOURCE')}"
-            if="${environment::variable-exists('LOCAL_PACKAGE_SOURCE')}"
-            overwrite="false" />
   <property name="project.path" value="${project::get-base-directory()}" />
-  <property name="asminfo.filepath" value="${project.path}/Passive/AssemblyInfo.cs" />
   <property name="dist.path" value="${project.path}/dist"/>
+  <property name="asminfo.filepath" value="${project.path}/Passive/AssemblyInfo.cs" />
   <property name="build.path" value="${project.path}/build"/>
   <property name="tests.path" value="${build.path}/tests" />
   <property name="build.debug" value="PDBOnly" overwrite="false" />
@@ -31,15 +23,42 @@
   <property name="github.user" value="${git::readconfig('github.user')}" />
   <property name="github.token" value="${git::readconfig('github.token')}" />
 
-  <target name="passive" depends="init create-assembly-info">
+  <property name="packages.source.local"
+          value="${dist.path}"
+          unless="${environment::variable-exists('LOCAL_PACKAGE_SOURCE')}"
+          overwrite="false" />
+  <property name="packages.source.local"
+            value="${environment::get-variable('LOCAL_PACKAGE_SOURCE')}"
+            if="${environment::variable-exists('LOCAL_PACKAGE_SOURCE')}"
+            overwrite="false" />
+
+  <target name="passive.async">
+    <property name="output.path" value="${build.path}/Passive.Async" />
+    <property name="build.defines" value="" />
+    <patternset id="additional-resources">
+      <include name="${project.path}/packages/Rx-Interactive.*/lib/Net4/System.Interactive.dll"/>
+      <include name="${project.path}/packages/Rx-AsyncLinq.*/lib/net4/System.Linq.Async.dll"/>
+      <include name="${project.path}/packages/Rx-Core.*/lib/net4/System.CoreEx.dll"/>
+    </patternset>
+    <call target="passive-compile" />
+  </target>
+
+  <target name="passive">
+    <property name="output.path" value="${build.path}/Passive" />
+    <property name="build.defines" value="NO_ASYNC" />
+    <patternset id="additional-resources" />
+    <call target="passive-compile" />
+  </target>
+  
+  <target name="passive-compile" depends="init create-assembly-info">
     <csc noconfig="true"
          warnaserror="true"
          target="library"
          debug="${build.debug}"
          optimize="${build.optimize}"
          define="${build.defines}"
-         output="${build.path}/Passive.dll"
-         doc="${build.path}/Passive.xml"
+         output="${output.path}/Passive.dll"
+         doc="${output.path}/Passive.xml"
          keyfile="Passive.snk" >
         <sources>
           <include name="${asminfo.filepath}"/>
@@ -52,16 +71,14 @@
           <include name="System.Core.dll"/>
           <include name="System.Configuration.dll"/>
           <include name="System.Data.dll"/>
-          <include name="${project.path}/packages/Rx-Interactive.*/lib/Net4/System.Interactive.dll"/>
-          <include name="${project.path}/packages/Rx-AsyncLinq.*/lib/net4/System.Linq.Async.dll"/>
-          <include name="${project.path}/packages/Rx-Core.*/lib/net4/System.CoreEx.dll"/>
+          <patternset refid="additional-resources" />
         </references>
     </csc>
   </target>
 
   <target name="compile-tests" depends="passive">
     <patternset id="test-dependencies">
-      <include name="${build.path}/Passive.dll" />
+      <include name="${build.path}/Passive/Passive.dll" />
       <include name="${project.path}/packages/Rx-Interactive.*/lib/Net4/System.Interactive.dll"/>
       <include name="${project.path}/packages/Rx-AsyncLinq.*/lib/net4/System.Linq.Async.dll"/>
       <include name="${project.path}/packages/Rx-Core.*/lib/net4/System.CoreEx.dll"/>
@@ -111,12 +128,23 @@
 
   </target>
 
-  <target name="all" depends="passive test" />
+  <target name="all" depends="passive passive.async test" />
   <target name="dist" depends="rebuild build-nuget-package build-dist-zip" />
   <target name="rebuild" depends="clean build" />
   <target name="build" depends="init all" />
   <target name="publish" depends="dist get-git-revision">
     <exec program="${tools.nuget.path}\nuget.exe" commandline="push ${dist.path}\Passive.${build.version}.nupkg" />
+    <exec program="${tools.nuget.path}\nuget.exe" commandline="push ${dist.path}\Passive.Async.${build.version}.nupkg" />
+    <github-addfile filename="${dist.path}\Passive.Async.${build.version}.nupkg"
+                    description="Passive (with Async support) Nuget package: v${build.version}"
+                    username="${github.user}"
+                    usertoken="${github.token}"
+                    repository="Talljoe/Passive" />
+    <github-addfile filename="${dist.path}\Passive.Async.${build.version}.zip"
+                    description="Passive (with Async support) binaries: v${build.version}"
+                    username="${github.user}"
+                    usertoken="${github.token}"
+                    repository="Talljoe/Passive" />
     <github-addfile filename="${dist.path}\Passive.${build.version}.nupkg"
                     description="Passive Nuget package: v${build.version}"
                     username="${github.user}"
@@ -159,10 +187,11 @@
     </asminfo>
   </target>
 
-  <target name="build-nuget-package" depends="build">
-    <xmlpoke file="Passive.nuspec"
-             xpath="//package/nu:metadata/nu:version"
-             value="${build.version}">
+
+  <target name="build-nuet-package-core">
+    <xmlpoke file="${nuspec.path}"
+         xpath="//package/nu:metadata/nu:version"
+         value="${build.version}">
       <namespaces>
         <namespace prefix="xsi" uri="http://www.w3.org/2001/XMLSchema-instance" />
         <namespace prefix="xsd" uri="http://www.w3.org/2001/XMLSchema" />
@@ -172,8 +201,15 @@
 
     <exec program="${tools.nuget.path}/nuget.exe"
           commandline="pack Passive.nuspec /OutputDirectory ${dist.path} /Verbose" />
+  </target>
+  
+  <target name="build-nuget-package" depends="build">
+    <property name="nuspec.path" value="Passive.nuspec" />
+    <call target="build-nuet-package-core" />
+    <property name="nuspec.path" value="Passive.Async.nuspec" />
+    <call target="build-nuet-package-core" />
 
-    <copy todir="${packages.source.local}" unless="${packages.source.local == ''}" flatten="true">
+    <copy todir="${packages.source.local}" unless="${packages.source.local == dist.path}" flatten="true">
       <fileset>
         <include name="${dist.path}/*.nupkg" />
       </fileset>
@@ -214,7 +250,12 @@
 
   <target name="build-dist-zip" depends="build">
     <zip zipfile="${dist.path}/Passive.${build.version}.zip">
-      <fileset basedir="${build.path}">
+      <fileset basedir="${build.path}/Passive">
+        <include name="*" />
+      </fileset>
+    </zip>
+    <zip zipfile="${dist.path}/Passive.Async.${build.version}.zip">
+      <fileset basedir="${build.path}/Passive.Async">
         <include name="*" />
       </fileset>
     </zip>

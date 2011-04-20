@@ -1,4 +1,5 @@
-﻿// Copyright (c) 2011 Tall Ambitions, LLC
+﻿#if !NO_ASYNC
+// Copyright (c) 2011 Tall Ambitions, LLC
 // See included LICENSE for details.
 namespace Passive.Async
 {
@@ -62,3 +63,4 @@ namespace Passive.Async
         }
     }
 }
+#endif
