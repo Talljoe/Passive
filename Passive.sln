@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		release.cmd = release.cmd
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Passive.Test", "Passive.Test\Passive.Test.csproj", "{5294A2A3-83B0-4504-8E81-7F1CF124D1FC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +24,10 @@ Global
 		{E3DC3E63-FACD-42A0-B1B5-D258C4E6AEA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3DC3E63-FACD-42A0-B1B5-D258C4E6AEA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E3DC3E63-FACD-42A0-B1B5-D258C4E6AEA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5294A2A3-83B0-4504-8E81-7F1CF124D1FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5294A2A3-83B0-4504-8E81-7F1CF124D1FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5294A2A3-83B0-4504-8E81-7F1CF124D1FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5294A2A3-83B0-4504-8E81-7F1CF124D1FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
