@@ -53,9 +53,36 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
+    <None Include="DynamicModelTests\All.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>All.feature.cs</LastGenOutput>
+    </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\TestData.sdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DynamicModelTests\AllSteps.cs" />
+    <Compile Include="DynamicModelTests\All.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>All.feature</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicModelTests\CommonSteps.cs" />
+    <Compile Include="Models\Appliance.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Passive\Passive.csproj">
+      <Project>{E3DC3E63-FACD-42A0-B1B5-D258C4E6AEA2}</Project>
+      <Name>Passive</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
