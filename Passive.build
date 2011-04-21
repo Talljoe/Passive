@@ -4,10 +4,6 @@
   <loadtasks assembly="tools/gitnub/Tall.Gitnub.Nant.dll" />
 
   <property name="packages.source.local"
-            value=""
-            unless="${environment::variable-exists('LOCAL_PACKAGE_SOURCE')}"
-            overwrite="false" />
-  <property name="packages.source.local"
             value="${environment::get-variable('LOCAL_PACKAGE_SOURCE')}"
             if="${environment::variable-exists('LOCAL_PACKAGE_SOURCE')}"
             overwrite="false" />
@@ -170,11 +166,13 @@
     <exec program="${tools.nuget.path}/nuget.exe"
           commandline="pack Passive.nuspec /OutputDirectory ${dist.path} /Verbose" />
 
-    <copy todir="${packages.source.local}" unless="${packages.source.local == ''}" flatten="true">
-      <fileset>
-        <include name="${dist.path}/*.nupkg" />
-      </fileset>
-    </copy>
+    <if test="${property::exists('packages.source.local')}">
+      <copy todir="${packages.source.local}" unless="${packages.source.local == ''}" flatten="true">
+        <fileset>
+          <include name="${dist.path}/*.nupkg" />
+        </fileset>
+      </copy>
+    </if>
   </target>
 
   <target name="get-git-revision">
