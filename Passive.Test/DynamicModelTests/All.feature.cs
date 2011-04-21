@@ -27,7 +27,7 @@ namespace Passive.Test.DynamicModelTests
         public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "DynamicModel All", "In order to access data\r\nAs a developer\r\nI want to get all rows from the database" +
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "DynamicModel All()", "In order to access data\r\nAs a developer\r\nI want to get all rows from the database" +
                     "", GenerationTargetLanguage.CSharp, ((string[])(null)));
             testRunner.OnFeatureStart(featureInfo);
         }
@@ -93,7 +93,7 @@ namespace Passive.Test.DynamicModelTests
         }
         
         [Xunit.FactAttribute()]
-        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All")]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
         [Xunit.TraitAttribute("Description", "Getting all records")]
         public virtual void GettingAllRecords()
         {
@@ -111,7 +111,7 @@ this.ScenarioSetup(scenarioInfo);
         }
         
         [Xunit.FactAttribute()]
-        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All")]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
         [Xunit.TraitAttribute("Description", "Getting some records")]
         public virtual void GettingSomeRecords()
         {
@@ -131,7 +131,7 @@ this.ScenarioSetup(scenarioInfo);
         }
         
         [Xunit.FactAttribute()]
-        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All")]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
         [Xunit.TraitAttribute("Description", "Asking for too many records")]
         public virtual void AskingForTooManyRecords()
         {
@@ -149,11 +149,11 @@ this.ScenarioSetup(scenarioInfo);
         }
         
         [Xunit.FactAttribute()]
-        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All")]
-        [Xunit.TraitAttribute("Description", "Filtering records by string")]
-        public virtual void FilteringRecordsByString()
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
+        [Xunit.TraitAttribute("Description", "Filtering records by an object")]
+        public virtual void FilteringRecordsByAnObject()
         {
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Filtering records by string", ((string[])(null)));
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Filtering records by an object", ((string[])(null)));
 #line 31
 this.ScenarioSetup(scenarioInfo);
 #line 32
@@ -164,6 +164,62 @@ this.ScenarioSetup(scenarioInfo);
   testRunner.Then("I should only have 2 results");
 #line 35
   testRunner.And("I should only get White-colored appliances");
+#line hidden
+            testRunner.CollectScenarioErrors();
+        }
+        
+        [Xunit.FactAttribute()]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
+        [Xunit.TraitAttribute("Description", "Filtering records by string")]
+        public virtual void FilteringRecordsByString()
+        {
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Filtering records by string", ((string[])(null)));
+#line 37
+this.ScenarioSetup(scenarioInfo);
+#line 38
+  testRunner.Given("I have a model for Appliance");
+#line 39
+  testRunner.When("I ask for appliances with more than 10 amps");
+#line 40
+  testRunner.Then("I should only have 3 results");
+#line 41
+  testRunner.And("I should only get appliances with more than 10 amps");
+#line hidden
+            testRunner.CollectScenarioErrors();
+        }
+        
+        [Xunit.FactAttribute()]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
+        [Xunit.TraitAttribute("Description", "Executing a query with order by")]
+        public virtual void ExecutingAQueryWithOrderBy()
+        {
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Executing a query with order by", ((string[])(null)));
+#line 43
+this.ScenarioSetup(scenarioInfo);
+#line 44
+  testRunner.Given("I have a model for Appliance");
+#line 45
+  testRunner.When("I order rows by Amps");
+#line 46
+  testRunner.Then("the records should be sorted by Amps");
+#line hidden
+            testRunner.CollectScenarioErrors();
+        }
+        
+        [Xunit.FactAttribute()]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
+        [Xunit.TraitAttribute("Description", "Executing a query with descending order by")]
+        public virtual void ExecutingAQueryWithDescendingOrderBy()
+        {
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Executing a query with descending order by", ((string[])(null)));
+#line 48
+this.ScenarioSetup(scenarioInfo);
+#line 49
+  testRunner.Given("I have a model for Appliance");
+#line 50
+  testRunner.When("I order rows by Id desc");
+#line 51
+  testRunner.Then("the records should be reverse-sorted by Id");
 #line hidden
             testRunner.CollectScenarioErrors();
         }

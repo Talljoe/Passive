@@ -41,36 +41,47 @@ namespace Passive.Test.DynamicModelTests
         #endregion
         #region Where
 
-        [When(@"I ask for appliances colored (.*)")]
+        [When(@"I ask for appliances colored (.+)")]
         public void WhenIAskForAppliancesColored(string color)
         {
             var model = ScenarioContext.Current.Get<DynamicModel>();
-            ScenarioContext.Current.Set(model.All(where: "[Color] = @0", args: color));
+            ScenarioContext.Current.Set(model.All(where: new {Color = color}));
+        }
+
+        [When(@"I ask for appliances with more than (\d+) amps")]
+        public void WhenIAskForAppliancesWithMoreThanNAmps(int amps)
+        {
+            var model = ScenarioContext.Current.Get<DynamicModel>();
+            ScenarioContext.Current.Set(model.All(where: "Amps > @0", args: amps));
         }
 
         #endregion
+
+        #region OrderBy
+
+        [When(@"I order rows by (.+)")]
+        public void WhenIOrderRowsBy(string order)
+        {
+            var model = ScenarioContext.Current.Get<DynamicModel>();
+            ScenarioContext.Current.Set(model.All(orderBy: order));
+        }
+
+        #endregion
+
         #region Then
 
         [Then(@"I should get all items")]
         public void ThenIShouldGetAllItems()
         {
             var expected = ScenarioContext.Current.Get<IEnumerable<Appliance>>();
-            var result = ScenarioContext.Current
-                .Get<IEnumerable<dynamic>>()
-                .Select(CreateApplianceFromDynamic)
-                .ToList();
-            result.Should().BeEquivalentTo(expected);
+            ApplianceResult.Should().BeEquivalentTo(expected);
         }
 
         [Then(@"they should be a subset of all data")]
         public void ThenTheyShouldBeASubsetOfAllData()
         {
             var expected = ScenarioContext.Current.Get<IEnumerable<Appliance>>();
-            var result = ScenarioContext.Current
-                .Get<IEnumerable<dynamic>>()
-                .Select(CreateApplianceFromDynamic)
-                .ToList();
-            result.Should().BeSubsetOf(expected);
+            ApplianceResult.Should().BeSubsetOf(expected);
         }
 
         [Then(@"I should only have (\d+) results?")]
@@ -80,18 +91,49 @@ namespace Passive.Test.DynamicModelTests
             result.Should().Be(rows, "because we asked for a subset of the data");
         }
 
+        [Then(@"I should only get appliances with more than (\d+) amps")]
+        public void ThenIShouldOnlyGetApplianceWithMoreThanNAmps(int amps)
+        {
+            var expected = ScenarioContext.Current.Get<IEnumerable<Appliance>>()
+                .Where(app => app.Amps > amps);
+            ApplianceResult.Should().BeEquivalentTo(expected);
+        }
+
         [Then(@"I should only get (.*?)-colored appliances")]
         public void ThenIShouldOnlyGetXColoredAppliances(string color)
         {
             var expected = ScenarioContext.Current.Get<IEnumerable<Appliance>>()
                 .Where(app => app.Color.Equals(color, StringComparison.OrdinalIgnoreCase));
-            var result = ScenarioContext.Current
-                .Get<IEnumerable<dynamic>>()
-                .Select(CreateApplianceFromDynamic)
-                .ToList();
-            result.Should().BeEquivalentTo(expected);
+            ApplianceResult.Should().BeEquivalentTo(expected);
+        }
+
+        [Then(@"the records should be sorted by Amps")]
+        public void ThenTheRecordsShouldBeSortedByAmps()
+        {
+            var expected = ScenarioContext.Current.Get<IEnumerable<Appliance>>()
+                .OrderBy(d => d.Amps);
+            ApplianceResult.Should().Equal(expected);
+        }
+
+        [Then(@"the records should be reverse-sorted by Id")]
+        public void ThenTheRecordsShouldBeReverseSortedById()
+        {
+            var expected = ScenarioContext.Current.Get<IEnumerable<Appliance>>()
+                .OrderByDescending(d => d.Id);
+            ApplianceResult.Should().Equal(expected);
         }
         #endregion
+
+        private static IEnumerable<Appliance> ApplianceResult
+        {
+            get
+            {
+                return ScenarioContext.Current
+                    .Get<IEnumerable<dynamic>>()
+                    .Select(CreateApplianceFromDynamic)
+                    .ToList();
+            }
+        }
 
         private static Appliance CreateApplianceFromDynamic(dynamic d)
         {
