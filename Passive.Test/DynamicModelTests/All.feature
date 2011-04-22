@@ -49,3 +49,13 @@ Scenario: Executing a query with descending order by
   Given I have a model for Appliance
   When I order rows by Id desc
   Then the records should be reverse-sorted by Id
+
+Scenario: Selecting a subset of columns
+  Given I have a model for Appliance
+  When I ask for the columns "Id, Name"
+  Then the records should only have the columns "Id, Name"
+
+Scenario: Selecting an invalid column
+  Given I have a model for Appliance
+  When I ask for an invalid column
+  Then the query should throw an exception

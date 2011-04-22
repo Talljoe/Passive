@@ -224,6 +224,42 @@ this.ScenarioSetup(scenarioInfo);
             testRunner.CollectScenarioErrors();
         }
         
+        [Xunit.FactAttribute()]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
+        [Xunit.TraitAttribute("Description", "Selecting a subset of columns")]
+        public virtual void SelectingASubsetOfColumns()
+        {
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Selecting a subset of columns", ((string[])(null)));
+#line 53
+this.ScenarioSetup(scenarioInfo);
+#line 54
+  testRunner.Given("I have a model for Appliance");
+#line 55
+  testRunner.When("I ask for the columns \"Id, Name\"");
+#line 56
+  testRunner.Then("the records should only have the columns \"Id, Name\"");
+#line hidden
+            testRunner.CollectScenarioErrors();
+        }
+        
+        [Xunit.FactAttribute()]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
+        [Xunit.TraitAttribute("Description", "Selecting an invalid column")]
+        public virtual void SelectingAnInvalidColumn()
+        {
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Selecting an invalid column", ((string[])(null)));
+#line 58
+this.ScenarioSetup(scenarioInfo);
+#line 59
+  testRunner.Given("I have a model for Appliance");
+#line 60
+  testRunner.When("I ask for an invalid column");
+#line 61
+  testRunner.Then("the query should throw an exception");
+#line hidden
+            testRunner.CollectScenarioErrors();
+        }
+        
         [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "1.5.0.0")]
         [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
         public class FixtureData : System.IDisposable
