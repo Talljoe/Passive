@@ -11,11 +11,11 @@ namespace Passive.Test.DynamicModelTests
     using FluentAssertions;
 
     [Binding]
-    internal class AllSteps
+    internal class DynamicModelSteps
     {
         private DynamicModelContext Context { get; set; }
 
-        public AllSteps(DynamicModelContext context)
+        public DynamicModelSteps(DynamicModelContext context)
         {
             this.Context = context;
         }
