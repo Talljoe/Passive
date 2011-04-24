@@ -76,6 +76,7 @@
       <DependentUpon>All.feature</DependentUpon>
     </Compile>
     <Compile Include="DynamicModelTests\CommonSteps.cs" />
+    <Compile Include="DynamicModelTests\DynamicModelContext.cs" />
     <Compile Include="Models\Appliance.cs" />
   </ItemGroup>
   <ItemGroup>

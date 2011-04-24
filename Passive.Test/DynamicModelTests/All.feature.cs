@@ -121,10 +121,12 @@ this.ScenarioSetup(scenarioInfo);
 #line 21
   testRunner.Given("I have a model for Appliance");
 #line 22
-  testRunner.When("I ask for 2 rows");
+  testRunner.When("I ask for all rows");
 #line 23
-  testRunner.Then("I should only have 2 results");
+  testRunner.And("I limit the query to 2 rows");
 #line 24
+  testRunner.Then("I should only have 2 results");
+#line 25
   testRunner.And("they should be a subset of all data");
 #line hidden
             testRunner.CollectScenarioErrors();
@@ -136,13 +138,15 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void AskingForTooManyRecords()
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Asking for too many records", ((string[])(null)));
-#line 26
-this.ScenarioSetup(scenarioInfo);
 #line 27
-  testRunner.Given("I have a model for Appliance");
+this.ScenarioSetup(scenarioInfo);
 #line 28
-  testRunner.When("I ask for more rows than are in the database");
+  testRunner.Given("I have a model for Appliance");
 #line 29
+  testRunner.When("I ask for all rows");
+#line 30
+  testRunner.And("I limit the query to more rows than are in the database");
+#line 31
   testRunner.Then("I should get all items");
 #line hidden
             testRunner.CollectScenarioErrors();
@@ -154,15 +158,17 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void FilteringRecordsByAnObject()
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Filtering records by an object", ((string[])(null)));
-#line 31
-this.ScenarioSetup(scenarioInfo);
-#line 32
-  testRunner.Given("I have a model for Appliance");
 #line 33
-  testRunner.When("I ask for appliances colored White");
+this.ScenarioSetup(scenarioInfo);
 #line 34
-  testRunner.Then("I should only have 2 results");
+  testRunner.Given("I have a model for Appliance");
 #line 35
+  testRunner.When("I ask for all rows");
+#line 36
+  testRunner.And("I only want appliances colored White");
+#line 37
+  testRunner.Then("I should only have 2 results");
+#line 38
   testRunner.And("I should only get White-colored appliances");
 #line hidden
             testRunner.CollectScenarioErrors();
@@ -174,15 +180,17 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void FilteringRecordsByString()
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Filtering records by string", ((string[])(null)));
-#line 37
-this.ScenarioSetup(scenarioInfo);
-#line 38
-  testRunner.Given("I have a model for Appliance");
-#line 39
-  testRunner.When("I ask for appliances with more than 10 amps");
 #line 40
-  testRunner.Then("I should only have 3 results");
+this.ScenarioSetup(scenarioInfo);
 #line 41
+  testRunner.Given("I have a model for Appliance");
+#line 42
+  testRunner.When("I ask for all rows");
+#line 43
+  testRunner.And("I only want appliances with more than 10 amps");
+#line 44
+  testRunner.Then("I should only have 3 results");
+#line 45
   testRunner.And("I should only get appliances with more than 10 amps");
 #line hidden
             testRunner.CollectScenarioErrors();
@@ -194,13 +202,15 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void ExecutingAQueryWithOrderBy()
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Executing a query with order by", ((string[])(null)));
-#line 43
+#line 47
 this.ScenarioSetup(scenarioInfo);
-#line 44
+#line 48
   testRunner.Given("I have a model for Appliance");
-#line 45
-  testRunner.When("I order rows by Amps");
-#line 46
+#line 49
+  testRunner.When("I ask for all rows");
+#line 50
+  testRunner.And("I order rows by Amps");
+#line 51
   testRunner.Then("the records should be sorted by Amps");
 #line hidden
             testRunner.CollectScenarioErrors();
@@ -212,13 +222,15 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void ExecutingAQueryWithDescendingOrderBy()
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Executing a query with descending order by", ((string[])(null)));
-#line 48
+#line 53
 this.ScenarioSetup(scenarioInfo);
-#line 49
+#line 54
   testRunner.Given("I have a model for Appliance");
-#line 50
-  testRunner.When("I order rows by Id desc");
-#line 51
+#line 55
+  testRunner.When("I ask for all rows");
+#line 56
+  testRunner.And("I order rows by Id desc");
+#line 57
   testRunner.Then("the records should be reverse-sorted by Id");
 #line hidden
             testRunner.CollectScenarioErrors();
@@ -230,13 +242,15 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void SelectingASubsetOfColumns()
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Selecting a subset of columns", ((string[])(null)));
-#line 53
+#line 59
 this.ScenarioSetup(scenarioInfo);
-#line 54
+#line 60
   testRunner.Given("I have a model for Appliance");
-#line 55
-  testRunner.When("I ask for the columns \"Id, Name\"");
-#line 56
+#line 61
+  testRunner.When("I ask for all rows");
+#line 62
+  testRunner.And("I ask for the columns \"Id, Name\"");
+#line 63
   testRunner.Then("the records should only have the columns \"Id, Name\"");
 #line hidden
             testRunner.CollectScenarioErrors();
@@ -248,13 +262,15 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void SelectingAnInvalidColumn()
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Selecting an invalid column", ((string[])(null)));
-#line 58
+#line 65
 this.ScenarioSetup(scenarioInfo);
-#line 59
+#line 66
   testRunner.Given("I have a model for Appliance");
-#line 60
-  testRunner.When("I ask for an invalid column");
-#line 61
+#line 67
+  testRunner.When("I ask for all rows");
+#line 68
+  testRunner.And("I ask for an invalid column");
+#line 69
   testRunner.Then("the query should throw an exception");
 #line hidden
             testRunner.CollectScenarioErrors();

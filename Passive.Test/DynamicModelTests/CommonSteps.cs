@@ -7,18 +7,13 @@ namespace Passive.Test.DynamicModelTests
     using TechTalk.SpecFlow.Assist;
 
     [Binding]
-    internal class DynamicModelSteps
+    internal class CommonSteps
     {
-        [Given(@"I have a model for (.*)")]
-        public void GivenIHaveAModelFor(string modelName)
-        {
-            ScenarioContext.Current.Set(new DynamicModel(tableName: modelName));
-        }
 
         [Given(@"a database with the following appliances")]
         public void GivenADatabaseWithTheFollowingAppliances(Table table)
         {
-            ScenarioContext.Current.Set(table.CreateSet<Appliance>());
+            ScenarioContext.Current.Set(table.CreateSet<Appliance>(), "Database");
         }
 
     }

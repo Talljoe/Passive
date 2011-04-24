@@ -13,42 +13,56 @@ namespace Passive.Test.DynamicModelTests
     [Binding]
     internal class AllSteps
     {
+        private DynamicModelContext Context { get; set; }
+
+        public AllSteps(DynamicModelContext context)
+        {
+            this.Context = context;
+        }
+
+        [Given(@"I have a model for (.*)")]
+        public void GivenIHaveAModelFor(string modelName)
+        {
+            Context.Model = new DynamicModel(tableName: modelName);
+        }
+
         #region Standard
 
         [When(@"I ask for all rows")]
         public void WhenIAskForAllRows()
         {
-            ScenarioContext.Current.Set(Model.All());
+            this.Context.SetMethod("All");
         }
 
         #endregion
         #region Limit
 
-        [When(@"I ask for (\d+) rows?")]
-        public void WhenIAskForNRows(int rows)
+        [When(@"I limit the query to (\d+) rows?")]
+        public void WhenILimitTheQueryTo(int rows)
         {
-            ScenarioContext.Current.Set(Model.All(limit: rows));
+            Context.Limit = rows;
         }
 
-        [When(@"I ask for more rows than are in the database")]
-        public void WhenIAskForMoreRowsThanAreInTheDatabase()
+        [When(@"I limit the query to more rows than are in the database")]
+        public void WhenILimitTheQueryToMoreRowsThanAreInTheDatabase()
         {
-            ScenarioContext.Current.Set(Model.All(limit: 10));
+            this.WhenILimitTheQueryTo(20);
         }
 
         #endregion
         #region Where
 
-        [When(@"I ask for appliances colored (.+)")]
-        public void WhenIAskForAppliancesColored(string color)
+        [When(@"I only want appliances colored (.+)")]
+        public void WhenIOnlyWantAppliancesColored(string color)
         {
-            ScenarioContext.Current.Set(Model.All(where: new {Color = color}));
+            Context.Where = new {Color = color};
         }
 
-        [When(@"I ask for appliances with more than (\d+) amps")]
+        [When(@"I only want appliances with more than (\d+) amps")]
         public void WhenIAskForAppliancesWithMoreThanNAmps(int amps)
         {
-            ScenarioContext.Current.Set(Model.All(where: "Amps > @0", args: amps));
+            Context.Where = "Amps > @0";
+            Context.Args.Add(amps);
         }
 
         #endregion
@@ -58,7 +72,7 @@ namespace Passive.Test.DynamicModelTests
         [When(@"I order rows by (.+)")]
         public void WhenIOrderRowsBy(string order)
         {
-            ScenarioContext.Current.Set(Model.All(orderBy: order));
+            Context.OrderBy = order;
         }
 
         #endregion
@@ -68,13 +82,13 @@ namespace Passive.Test.DynamicModelTests
         [When(@"I ask for the columns ""(.*?)""")]
         public void WhenIAskForTheColumns(string columns)
         {
-            ScenarioContext.Current.Set(Model.All(columns: columns));
+            Context.Columns = columns;
         }
 
         [When(@"I ask for an invalid column")]
         public void WhenIAskForAnInvalidColumn()
         {
-            ScenarioContext.Current.Set(Model.All(columns: "BadColumn"));
+            this.WhenIAskForTheColumns("BadColumn");
         }
 
         #endregion
@@ -131,8 +145,7 @@ namespace Passive.Test.DynamicModelTests
         [Then(@"the query should throw an exception")]
         public void ThenTheQueryShouldThrowAnException()
         {
-            ScenarioContext.Current.Get<IEnumerable<dynamic>>()
-                .Invoking(l => l.ToList())
+            Result.Invoking(l => l.ToList())
                 .ShouldThrow<DbException>("because we asked for a column that did not exist");
         }
 
@@ -140,30 +153,29 @@ namespace Passive.Test.DynamicModelTests
         public void ThenTheRecordsShouldOnlyHaveTheColumns(string columns)
         {
             var expectedColumns = columns.Split(new[]{',', ' '}, StringSplitOptions.RemoveEmptyEntries);
-            var result = ScenarioContext.Current.Get<IEnumerable<dynamic>>().Select(d => ((object) d).ToDictionary());
+            var result = Result.Select(d => ((object) d).ToDictionary());
             result.ForEach(d => d.Keys.Should().BeEquivalentTo(expectedColumns));
         }
         #endregion
 
-        private static IEnumerable<Appliance> ApplianceResult
+        private IEnumerable<Appliance> ApplianceResult
         {
             get
             {
-                return ScenarioContext.Current
-                    .Get<IEnumerable<dynamic>>()
+                return this.Result
                     .Select(CreateApplianceFromDynamic)
                     .ToList();
             }
         }
 
-        private static DynamicModel Model
+        private IEnumerable<dynamic> Result
         {
-            get { return ScenarioContext.Current.Get<DynamicModel>(); }
+            get { return (IEnumerable<dynamic>)this.Context.GetResult().Items; }
         }
 
         private static IEnumerable<Appliance> ApplianceTableData
         {
-            get { return ScenarioContext.Current.Get<IEnumerable<Appliance>>(); }
+            get { return ScenarioContext.Current.Get<IEnumerable<Appliance>>("Database"); }
         }
 
         private static Appliance CreateApplianceFromDynamic(dynamic d)
