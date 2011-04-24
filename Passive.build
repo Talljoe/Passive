@@ -20,7 +20,7 @@
   <property name="tools.github-upload.path" value="${project.path}/tools/github-upload"/>
   <property name="tools.xunit.path" value="${project.path}/tools/xunit"/>
   <property name="build.version"
-            value="${version.major}.${version.minor}.${version.build}.${version.revision}"
+            value="${version.major}.${version.minor}.${version.revision}.${version.build}"
             dynamic="true"/>
   <property name="build.assemblyversion" value="${version.major}.${version.minor}.0.0" dynamic="true"/>
 
@@ -183,12 +183,29 @@
           failonerror="true"
           output="${temp.revision.file}" />
     <loadfile file="${temp.revision.file}" property="actual.git.revision" />
-    <regex pattern="(?'gitmajor'\d+)\.(?'gitminor'\d+)\.(?'gitbuild'\d+)\.(\d+)-(?'gitrevisionnumber'\d+)-.*"
+    <regex pattern="(?'gitmajor'\d+)\.(?'gitminor'\d+)\.(?'gitlastrevision'\d+)\.(\d+)-(?'gitrevisionnumber'\d+)-.*"
            input="${actual.git.revision}" />
+
+
+    <xmlpeek file="Passive.nuspec"
+     xpath="//package/nu:metadata/nu:version"
+     property="actual.nuspec.revision">
+      <namespaces>
+        <namespace prefix="xsi" uri="http://www.w3.org/2001/XMLSchema-instance" />
+        <namespace prefix="xsd" uri="http://www.w3.org/2001/XMLSchema" />
+        <namespace prefix="nu" uri="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd" />
+      </namespaces>
+    </xmlpeek>
+
+    <regex pattern="(?'nuspecmajor'\d+)\.(?'nuspecminor'\d+)\.(?'nuspecrevisionnumber'\d+)\.(?'nuspecbuild'\d+)"
+           input="${actual.nuspec.revision}" />
+
     <property name="version.major" value="${gitmajor}" overwrite="true" />
     <property name="version.minor" value="${gitminor}" overwrite="true" />
-    <property name="version.build" value="${gitbuild}" overwrite="true" />
-    <property name="version.revision" value="${gitrevisionnumber}" overwrite="true" />
+    <property name="version.revision" value="${int::parse(gitlastrevision) + int::parse(gitrevisionnumber)}" overwrite="true" />
+    <property name="sameversion" value="${nuspecmajor == version.major and nuspecminor == version.minor and nuspecrevisionnumber == version.revision}" />
+    <property name="version.build" value="0" overwrite="true" unless="${sameversion}" />
+    <property name="version.build" value="${int::parse(nuspecbuild) + 1}" overwrite="true" if="${sameversion}" />
     <delete file="${temp.revision.file}" failonerror="false" />
   </target>
 
