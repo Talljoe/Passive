@@ -41,6 +41,7 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="ColumnIgnoreAttribute.cs" />
     <Compile Include="ColumnNameAttribute.cs" />
+    <Compile Include="DatabaseCapabilities.cs" />
     <Compile Include="DynamicCommand.cs" />
     <Compile Include="DynamicDatabase.cs" />
     <Compile Include="DynamicModel.cs" />

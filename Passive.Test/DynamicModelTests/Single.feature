@@ -1,7 +1,7 @@
 ﻿Feature: DynamicModel Single()
   In order to access data
   As a developer
-  I want to get all rows from the database
+  I want to get a single row from the database
 
 Background:
   Given a database with the following appliances
@@ -57,22 +57,6 @@ Scenario Outline: Filtering records by string
     | 15    | 1     |
     | 20    | 1     |
     | 30    | 0     |
-
-
-Scenario Outline: Executing a query with order by
-  Given I have a model for Appliance
-  When I ask for a single row
-  And I order rows by Amps
-  Then I should get appliance #1
-
-  Examples:
-  | orderby   | id |
-  | id        | 1  |
-  | id desc   | 4  |
-  | name      | 4  |
-  | name desc | 2  |
-  | AMPS      | 1  |
-  | AMPS DESC | 3  |
 
 Scenario: Selecting a subset of columns
   Given I have a model for Appliance

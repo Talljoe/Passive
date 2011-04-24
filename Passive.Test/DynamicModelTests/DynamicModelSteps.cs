@@ -6,6 +6,7 @@ namespace Passive.Test.DynamicModelTests
     using System.Collections.Generic;
     using System.Data.Common;
     using System.Linq;
+    using System.Linq.Expressions;
     using Passive.Test.Models;
     using Passive.Test.Utility;
     using TechTalk.SpecFlow;
@@ -41,6 +42,12 @@ namespace Passive.Test.DynamicModelTests
             this.Context.SetMethod("Single");
         }
 
+        [When(@"I ask for page (\d+)")]
+        public void WhenIAskForPage(int page)
+        {
+            this.Context.SetMethod("Paged");
+            this.Context.CurrentPage = page;
+        }
         #endregion
 
         #region Limit
@@ -113,6 +120,16 @@ namespace Passive.Test.DynamicModelTests
 
         #endregion
 
+        #region Paging
+
+        [When(@"the page size is (\d+)")]
+        public void WhenThePageSizeIs(int pageSize)
+        {
+            this.Context.PageSize = pageSize;
+        }
+
+        #endregion
+
         #region Then
 
         [Then(@"I should get all items")]
@@ -124,7 +141,7 @@ namespace Passive.Test.DynamicModelTests
         [Then(@"(?:they|it) should be a subset of (?:all|the) data")]
         public void ThenTheyShouldBeASubsetOfAllData()
         {
-            ApplianceResult.Should().BeSubsetOf(ApplianceTableData);
+            ApplianceResult.Should().BeEmptyOrSubsetOf(ApplianceTableData);
         }
 
         [Then(@"I should get no results")]
@@ -155,10 +172,10 @@ namespace Passive.Test.DynamicModelTests
             ApplianceResult.Should().BeEmptyOrSubsetOf(expected);
         }
 
-        [Then(@"the records should be sorted by Amps")]
-        public void ThenTheRecordsShouldBeSortedByAmps()
+        [Then(@"the records should be sorted by (.*)")]
+        public void ThenTheRecordsShouldBeSortedBy(string column)
         {
-            var expected = ApplianceTableData.OrderBy(d => d.Amps);
+            var expected = ApplianceTableData.OrderBy(GetPropertyLambda(column));
             ApplianceResult.Should().Equal(expected);
         }
 
@@ -168,10 +185,10 @@ namespace Passive.Test.DynamicModelTests
             ApplianceResult.Select(app => app.Id).Single().Should().Be(id);
         }
 
-        [Then(@"the records should be reverse-sorted by Id")]
-        public void ThenTheRecordsShouldBeReverseSortedById()
+        [Then(@"the records should be reverse-sorted by (.*)")]
+        public void ThenTheRecordsShouldBeReverseSortedBy(string column)
         {
-            var expected = ApplianceTableData.OrderByDescending(d => d.Id);
+            var expected = ApplianceTableData.OrderByDescending(GetPropertyLambda(column));
             ApplianceResult.Should().Equal(expected);
         }
 
@@ -200,6 +217,13 @@ namespace Passive.Test.DynamicModelTests
                     .Select(CreateApplianceFromDynamic)
                     .ToList();
             }
+        }
+
+        private static Func<Appliance, object> GetPropertyLambda(string column)
+        {
+            var parameter = Expression.Parameter(typeof(Appliance), "appliance");
+            var property = Expression.Convert(Expression.Property(parameter, column), typeof(object));
+            return Expression.Lambda<Func<Appliance, object>>(property, parameter).Compile();
         }
 
         private IEnumerable<dynamic> Result

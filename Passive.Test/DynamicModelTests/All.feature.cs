@@ -211,12 +211,15 @@ this.ScenarioSetup(scenarioInfo);
             testRunner.CollectScenarioErrors();
         }
         
-        [Xunit.FactAttribute()]
+        [Xunit.Extensions.TheoryAttribute()]
         [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
         [Xunit.TraitAttribute("Description", "Executing a query with order by")]
-        public virtual void ExecutingAQueryWithOrderBy()
+        [Xunit.Extensions.InlineDataAttribute("id", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("name", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("AMPS", new string[0])]
+        public virtual void ExecutingAQueryWithOrderBy(string orderby, string[] exampleTags)
         {
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Executing a query with order by", ((string[])(null)));
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Executing a query with order by", exampleTags);
 #line 71
 this.ScenarioSetup(scenarioInfo);
 #line 72
@@ -224,29 +227,32 @@ this.ScenarioSetup(scenarioInfo);
 #line 73
   testRunner.When("I ask for all rows");
 #line 74
-  testRunner.And("I order rows by Amps");
+  testRunner.And(string.Format("I order rows by {0}", orderby));
 #line 75
-  testRunner.Then("the records should be sorted by Amps");
+  testRunner.Then(string.Format("the records should be sorted by {0}", orderby));
 #line hidden
             testRunner.CollectScenarioErrors();
         }
         
-        [Xunit.FactAttribute()]
+        [Xunit.Extensions.TheoryAttribute()]
         [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
         [Xunit.TraitAttribute("Description", "Executing a query with descending order by")]
-        public virtual void ExecutingAQueryWithDescendingOrderBy()
+        [Xunit.Extensions.InlineDataAttribute("id", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("name", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("AMPS", new string[0])]
+        public virtual void ExecutingAQueryWithDescendingOrderBy(string orderby, string[] exampleTags)
         {
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Executing a query with descending order by", ((string[])(null)));
-#line 77
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Executing a query with descending order by", exampleTags);
+#line 83
 this.ScenarioSetup(scenarioInfo);
-#line 78
+#line 84
   testRunner.Given("I have a model for Appliance");
-#line 79
+#line 85
   testRunner.When("I ask for all rows");
-#line 80
-  testRunner.And("I order rows by Id desc");
-#line 81
-  testRunner.Then("the records should be reverse-sorted by Id");
+#line 86
+  testRunner.And(string.Format("I order rows by {0} desc", orderby));
+#line 87
+  testRunner.Then(string.Format("the records should be reverse-sorted by {0}", orderby));
 #line hidden
             testRunner.CollectScenarioErrors();
         }
@@ -257,15 +263,15 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void SelectingASubsetOfColumns()
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Selecting a subset of columns", ((string[])(null)));
-#line 83
+#line 95
 this.ScenarioSetup(scenarioInfo);
-#line 84
+#line 96
   testRunner.Given("I have a model for Appliance");
-#line 85
+#line 97
   testRunner.When("I ask for all rows");
-#line 86
+#line 98
   testRunner.And("I ask for the columns \"Id, Name\"");
-#line 87
+#line 99
   testRunner.Then("the records should only have the columns \"Id, Name\"");
 #line hidden
             testRunner.CollectScenarioErrors();
@@ -277,15 +283,15 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void SelectingAnInvalidColumn()
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Selecting an invalid column", ((string[])(null)));
-#line 89
+#line 101
 this.ScenarioSetup(scenarioInfo);
-#line 90
+#line 102
   testRunner.Given("I have a model for Appliance");
-#line 91
+#line 103
   testRunner.When("I ask for all rows");
-#line 92
+#line 104
   testRunner.And("I ask for an invalid column");
-#line 93
+#line 105
   testRunner.Then("the query should throw an exception");
 #line hidden
             testRunner.CollectScenarioErrors();

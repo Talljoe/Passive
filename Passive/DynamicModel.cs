@@ -32,7 +32,7 @@ namespace Passive
         {
             this.Database = database ?? new DynamicDatabase();
             this.TableName = tableName == "" ? this.GetType().Name : tableName;
-            this.PrimaryKeyField = string.IsNullOrEmpty(primaryKeyField) ? "ID" : primaryKeyField;
+            this.PrimaryKeyField = string.IsNullOrWhiteSpace(primaryKeyField) ? "ID" : primaryKeyField;
         }
 
         /// <summary>
@@ -226,40 +226,13 @@ namespace Passive
             return result;
         }
 
-        private DynamicCommand BuildCommand(string sql, object key = null, object where = null, params object[] args)
-        {
-            var command = new DynamicCommand {Sql = sql};
-            if (key != null)
-            {
-                where = new Dictionary<string, object> {{this.PrimaryKeyField, key}};
-            }
-            if (where == null)
-            {
-                return command;
-            }
-            var whereString = where as string;
-            if (whereString != null)
-            {
-                var keyword = Regex.IsMatch(sql, " WHERE ", RegexOptions.IgnoreCase) ? " AND " : " WHERE ";
-                command.Sql += keyword + Regex.Replace(whereString.Trim(), @"^where ", String.Empty, RegexOptions.IgnoreCase);
-                command.Arguments = (command.Arguments ?? Enumerable.Empty<object>()).Concat(args);
-            }
-            else
-            {
-                var dict = where.ToDictionary();
-                command.Sql += " WHERE " +
-                               String.Join(" AND ", dict.Select((kvp, i) => String.Format("{0} = @{1}", kvp.Key, i)));
-                command.Arguments = dict.Select(kvp => kvp.Value).ToArray();
-            }
-            return command;
-        }
-
         /// <summary>
         ///   Removes one or more records from the DB according to the passed-in WHERE
         /// </summary>
         protected virtual DynamicCommand CreateDeleteCommand(object key = null, object where = null, params object[] args)
         {
-            return this.BuildCommand(string.Format("DELETE FROM {0}", this.TableName), key, where, args);
+            var command = new DynamicCommand {Sql = string.Format("DELETE FROM {0}", this.TableName), Arguments = args};
+            return command;
         }
 
         /// <summary>
@@ -296,8 +269,10 @@ namespace Passive
         {
             var sql = String.Format(limit > 0 ? "SELECT TOP " + limit + " {0} FROM {1}" : "SELECT {0} FROM {1}",
                                     GetColumns(columns), this.TableName);
-            var command = this.BuildCommand(sql, where: where, args: args);
-            if (!String.IsNullOrEmpty(orderBy))
+            var whereInfo = this.GetWhereInfo(where, null, args);
+            var command1 = new DynamicCommand {Sql = sql + whereInfo.Sql, Arguments = whereInfo.Args};
+            var command = command1;
+            if (!String.IsNullOrWhiteSpace(orderBy))
             {
                 command.Sql += (orderBy.Trim().StartsWith("order by", StringComparison.CurrentCultureIgnoreCase)
                                     ? " "
@@ -312,18 +287,17 @@ namespace Passive
         public dynamic Paged(object where = null, string orderBy = "", object columns = null, int pageSize = 20,
                              int currentPage = 1, params object[] args)
         {
-            var countSql = string.Format("SELECT COUNT({0}) FROM {1}", this.PrimaryKeyField, this.TableName);
-            if (String.IsNullOrEmpty(orderBy))
+            var whereInfo = GetWhereInfo(where, null, args);
+            var countSql = string.Format("SELECT COUNT({0}) FROM {1} {2}", this.PrimaryKeyField, this.TableName, whereInfo.Sql);
+            if (String.IsNullOrWhiteSpace(orderBy))
             {
                 orderBy = this.PrimaryKeyField;
             }
-            var sql =
-                string.Format("SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY {1}) AS Row, {0} FROM {2}) AS Paged",
-                              GetColumns(columns), orderBy, this.TableName);
-            var pageStart = (currentPage - 1)*pageSize;
-            sql += string.Format(" WHERE Row >={0} AND Row <={1}", pageStart, (pageStart + pageSize));
-            var queryCommand = this.BuildCommand(sql, where: where, args: args);
-            var whereCommand = this.BuildCommand(countSql, where: where, args: args);
+            var sql = this.GetPaging(this.TableName, GetColumns(columns), orderBy, whereInfo.Sql, pageSize, currentPage);
+            var command = new DynamicCommand {Sql = sql, Arguments = whereInfo.Args};
+            var queryCommand = command;
+            var command1 = new DynamicCommand {Sql = countSql, Arguments = whereInfo.Args};
+            var whereCommand = command1;
             var totalRecords = (int) this.Database.Scalar(whereCommand);
             return new
                        {
@@ -340,7 +314,76 @@ namespace Passive
         public virtual dynamic Single(object key = null, object where = null, object columns = null, params object[] args)
         {
             var sql = string.Format("SELECT {0} FROM {1}", GetColumns(columns), this.TableName);
-            return this.Database.Fetch(this.BuildCommand(sql, key, where, args)).FirstOrDefault();
+            var whereInfo = this.GetWhereInfo(where, key, args);
+            var command = new DynamicCommand {Sql = sql + whereInfo.Sql, Arguments = whereInfo.Args};
+            return this.Database.Fetch(command).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the SQL for a paging operation
+        /// </summary>
+        protected virtual string GetPaging(string tableName, string columns, string orderBy, string where, int pageSize, int currentPage)
+        {
+            var pageStart = (currentPage - 1) * pageSize;
+            const string rowNumberFormat = "SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY {1}) AS [Row___], {0} FROM {2}) AS Paged {3}";
+            const string offsetFormat = "SELECT {0} FROM {2} {3} ORDER BY {1} OFFSET {4} ROWS FETCH NEXT {5} ROWS ONLY";
+            string format;
+            if(this.Database.Capabilities.SupportsOffset)
+            {
+                format = offsetFormat;
+            }
+            else if(this.Database.Capabilities.SupportsRowNumber)
+            {
+                format = rowNumberFormat;
+                where = String.IsNullOrWhiteSpace(where) ? " WHERE " : where + " AND ";
+                where += String.Format("[Row___] >= {0} AND [Row___] <= {1}", pageStart, (pageStart + pageSize));
+            }
+            else
+            {
+                throw new NotSupportedException("Paging is not supported for this server.");
+            }
+
+            return String.Format(format, GetColumns(columns), orderBy, this.TableName, where, pageStart, pageSize);
+        }
+
+        private WhereInfo GetWhereInfo(object where, object key, IEnumerable<object> args)
+        {
+            if (key != null)
+            {
+                where = new Dictionary<string, object> { { this.PrimaryKeyField, key } };
+            }
+            var whereString = where as string;
+            if (whereString != null)
+            {
+                if (!Regex.IsMatch(whereString.Trim(), "^where ", RegexOptions.IgnoreCase))
+                {
+                    whereString = "WHERE " + whereString;
+                }
+                return new WhereInfo(" " + whereString.TrimStart(' '), args);
+            }
+
+            if (where != null)
+            {
+                var dict = where.ToDictionary();
+
+                var sql = " WHERE " +
+                          String.Join(" AND ", dict.Select((kvp, i) => String.Format("{0} = @{1}", kvp.Key, i)));
+                return new WhereInfo(sql, dict.Select(kvp => kvp.Value).ToArray());
+            }
+
+            return new WhereInfo(String.Empty, Enumerable.Empty<object>());
+        }
+
+        private class WhereInfo
+        {
+            public WhereInfo(string sql, IEnumerable<object> args)
+            {
+                this.Sql = sql;
+                this.Args = args;
+            }
+
+            public string Sql { get; private set; }
+            public IEnumerable<object> Args { get; private set; }
         }
     }
 }
