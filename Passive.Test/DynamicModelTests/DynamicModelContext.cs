@@ -11,8 +11,20 @@ namespace Passive.Test.DynamicModelTests
     {
         private List<object> args;
         private Func<dynamic> function;
+        private DynamicModel model;
 
-        public DynamicModel Model { get; set; }
+        public DynamicModel Model
+        {
+            get
+            {
+                if (model == null)
+                {
+                    throw new InvalidOperationException("No model has been set.");
+                }
+                return this.model;
+            }
+            set { this.model = value; }
+        }
 
         public int? CurrentPage { get; set; }
 
@@ -76,8 +88,17 @@ namespace Passive.Test.DynamicModelTests
         private dynamic SingleFunc()
         {
             dynamic d = new ExpandoObject();
-            d.Items = new[] {this.Model.Single(this.Key, this.Where, this.Columns)};
+            d.Items = GetSingle();
             return d;
+        }
+
+        private IEnumerable<dynamic> GetSingle()
+        {
+            var result = this.Model.Single(this.Key, this.Where, this.Columns, this.GetArgs());
+            if (result != null)
+            {
+                yield return result;
+            }
         }
 
         private object[] GetArgs()

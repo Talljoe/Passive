@@ -9,6 +9,14 @@ namespace Passive.Test.Utility
 
     public static class ShouldExtensions
     {
+        public static AndConstraint<GenericCollectionAssertions<T>> BeEmptyOrSubsetOf<T>(
+            this GenericCollectionAssertions<T> source, IEnumerable<T> expected, string reason = null, params object[] reasonArgs)
+        {
+            return source.Subject.Any()
+                ? source.BeSubsetOf(expected, reason, reasonArgs)
+                : source.BeEmpty(reason, reasonArgs);
+        }
+
         public static AndConstraint<GenericCollectionAssertions<T>> HaveEquivalencyTo<T>(
             this GenericCollectionAssertions<T> source, IEnumerable<T> expected, string reason = null, params object[] reasonArgs)
         {

@@ -61,6 +61,10 @@
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>All.feature.cs</LastGenOutput>
     </None>
+    <None Include="DynamicModelTests\Single.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>Single.feature.cs</LastGenOutput>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -80,6 +84,11 @@
     </Compile>
     <Compile Include="DynamicModelTests\CommonSteps.cs" />
     <Compile Include="DynamicModelTests\DynamicModelContext.cs" />
+    <Compile Include="DynamicModelTests\Single.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Single.feature</DependentUpon>
+    </Compile>
     <Compile Include="Models\Appliance.cs" />
     <Compile Include="Utility\ShouldExtensions.cs" />
   </ItemGroup>

@@ -35,6 +35,12 @@ namespace Passive.Test.DynamicModelTests
             this.Context.SetMethod("All");
         }
 
+        [When(@"I ask for a single row")]
+        public void WhenIAskForASingleRow()
+        {
+            this.Context.SetMethod("Single");
+        }
+
         #endregion
 
         #region Limit
@@ -96,6 +102,17 @@ namespace Passive.Test.DynamicModelTests
 
         #endregion
 
+        #region Key
+
+        [When(@"I ask for the record with the id of (\d+)")]
+        public void WhenIAskForTheRecordWithTheIdOf(int id)
+        {
+            Context.SetMethod("single");
+            Context.Key = id;
+        }
+
+        #endregion
+
         #region Then
 
         [Then(@"I should get all items")]
@@ -104,23 +121,30 @@ namespace Passive.Test.DynamicModelTests
             ApplianceResult.Should().BeEquivalentTo(ApplianceTableData);
         }
 
-        [Then(@"they should be a subset of all data")]
+        [Then(@"(?:they|it) should be a subset of (?:all|the) data")]
         public void ThenTheyShouldBeASubsetOfAllData()
         {
             ApplianceResult.Should().BeSubsetOf(ApplianceTableData);
         }
 
+        [Then(@"I should get no results")]
+        public void ThenIShouldGetNoResults()
+        {
+            ApplianceResult.Should().BeEmpty();
+        }
+
         [Then(@"I should only have (\d+) results?")]
+        [Then(@"I should get (\d+) results?")]
         public void ThenIShouldOnlyHaveNResults(int rows)
         {
-            ApplianceResult.Count().Should().Be(rows, "because we asked for a subset of the data");
+            ApplianceResult.Should().HaveCount(rows, "because we asked for a subset of the data");
         }
 
         [Then(@"I should only get appliances with more than (\d+) amps")]
         public void ThenIShouldOnlyGetApplianceWithMoreThanNAmps(int amps)
         {
             var expected = ApplianceTableData.Where(app => app.Amps > amps);
-            expected.Should().HaveEquivalencyTo(expected);
+            expected.Should().BeEmptyOrSubsetOf(expected);
         }
 
         [Then(@"I should only get (.*?)-colored appliances")]
@@ -128,7 +152,7 @@ namespace Passive.Test.DynamicModelTests
         {
             var expected = ApplianceTableData
                 .Where(app => app.Color.Equals(color, StringComparison.OrdinalIgnoreCase));
-            ApplianceResult.Should().HaveEquivalencyTo(expected);
+            ApplianceResult.Should().BeEmptyOrSubsetOf(expected);
         }
 
         [Then(@"the records should be sorted by Amps")]
@@ -136,6 +160,12 @@ namespace Passive.Test.DynamicModelTests
         {
             var expected = ApplianceTableData.OrderBy(d => d.Amps);
             ApplianceResult.Should().Equal(expected);
+        }
+
+        [Then(@"I should get appliance \#(\d+)")]
+        public void ThenIShouldGetAppliance(int id)
+        {
+            ApplianceResult.Select(app => app.Id).Single().Should().Be(id);
         }
 
         [Then(@"the records should be reverse-sorted by Id")]

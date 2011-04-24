@@ -337,10 +337,10 @@ namespace Passive
         /// <summary>
         ///   Returns a single row from the database
         /// </summary>
-        public virtual dynamic Single(object key = null, object where = null, object columns = null)
+        public virtual dynamic Single(object key = null, object where = null, object columns = null, params object[] args)
         {
             var sql = string.Format("SELECT {0} FROM {1}", GetColumns(columns), this.TableName);
-            return this.Database.Fetch(this.BuildCommand(sql, key, where)).FirstOrDefault();
+            return this.Database.Fetch(this.BuildCommand(sql, key, where, args)).FirstOrDefault();
         }
     }
 }
