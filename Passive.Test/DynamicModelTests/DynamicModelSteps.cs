@@ -7,6 +7,7 @@ namespace Passive.Test.DynamicModelTests
     using System.Data.Common;
     using System.Linq;
     using Passive.Test.Models;
+    using Passive.Test.Utility;
     using TechTalk.SpecFlow;
     using FluentAssertions;
 
@@ -35,6 +36,7 @@ namespace Passive.Test.DynamicModelTests
         }
 
         #endregion
+
         #region Limit
 
         [When(@"I limit the query to (\d+) rows?")]
@@ -50,6 +52,7 @@ namespace Passive.Test.DynamicModelTests
         }
 
         #endregion
+
         #region Where
 
         [When(@"I only want appliances colored (.+)")]
@@ -117,7 +120,7 @@ namespace Passive.Test.DynamicModelTests
         public void ThenIShouldOnlyGetApplianceWithMoreThanNAmps(int amps)
         {
             var expected = ApplianceTableData.Where(app => app.Amps > amps);
-            ApplianceResult.Should().BeEquivalentTo(expected);
+            expected.Should().HaveEquivalencyTo(expected);
         }
 
         [Then(@"I should only get (.*?)-colored appliances")]
@@ -125,7 +128,7 @@ namespace Passive.Test.DynamicModelTests
         {
             var expected = ApplianceTableData
                 .Where(app => app.Color.Equals(color, StringComparison.OrdinalIgnoreCase));
-            ApplianceResult.Should().BeEquivalentTo(expected);
+            ApplianceResult.Should().HaveEquivalencyTo(expected);
         }
 
         [Then(@"the records should be sorted by Amps")]
@@ -156,6 +159,7 @@ namespace Passive.Test.DynamicModelTests
             var result = Result.Select(d => ((object) d).ToDictionary());
             result.ForEach(d => d.Keys.Should().BeEquivalentTo(expectedColumns));
         }
+        
         #endregion
 
         private IEnumerable<Appliance> ApplianceResult

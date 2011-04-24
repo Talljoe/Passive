@@ -17,12 +17,19 @@ Scenario: Getting all records
   When I ask for all rows
   Then I should get all items
 
-Scenario: Getting some records
+Scenario Outline: Getting some records
   Given I have a model for Appliance
   When I ask for all rows
-  And I limit the query to 2 rows
-  Then I should only have 2 results
+  And I limit the query to <n> rows
+  Then I should only have <n> results
   And they should be a subset of all data
+
+  Examples:
+    |n|
+    |1|
+    |2|
+    |3|
+    |4|
 
 Scenario: Asking for too many records
   Given I have a model for Appliance
@@ -30,19 +37,36 @@ Scenario: Asking for too many records
   And I limit the query to more rows than are in the database
   Then I should get all items
 
-Scenario: Filtering records by an object
+Scenario Outline: Filtering records by an object
   Given I have a model for Appliance
   When I ask for all rows
-  And I only want appliances colored White
-  Then I should only have 2 results
-  And I should only get White-colored appliances
+  And I only want appliances colored <value>
+  Then I should only have <count> results
+  And I should only get <value>-colored appliances
 
-Scenario: Filtering records by string
+  Examples:
+  | value           | count |
+  | Stainless Steel | 1     |
+  | Red             | 1     |
+  | White           | 2     |
+  | Green           | 0     |
+
+Scenario Outline: Filtering records by string
   Given I have a model for Appliance
   When I ask for all rows
-  And I only want appliances with more than 10 amps
-  Then I should only have 3 results
-  And I should only get appliances with more than 10 amps
+  And I only want appliances with more than <value> amps
+  Then I should only have <count> results
+  And I should only get appliances with more than <value> amps
+
+  Examples:
+    | value | count |
+    | 6     | 4     |
+    | 7     | 3     |
+    | 10    | 3     |
+    | 15    | 2     |
+    | 20    | 1     |
+    | 30    | 0     |
+
 
 Scenario: Executing a query with order by
   Given I have a model for Appliance

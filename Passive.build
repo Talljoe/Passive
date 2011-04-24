@@ -59,6 +59,7 @@
       <include name="${project.path}/packages/Rx-AsyncLinq.*/lib/net4/System.Linq.Async.dll"/>
       <include name="${project.path}/packages/Rx-Core.*/lib/net4/System.CoreEx.dll"/>
       <include name="${project.path}/packages/xunit.*/lib/xunit.dll"/>
+      <include name="${project.path}/packages/xunit.extensions.*/lib/xunit.extensions.dll"/>
       <include name="${project.path}/packages/SqlServerCompact.*/lib/System.Data.SqlServerCe.dll"/>
       <include name="${project.path}/packages/SpecFlow.*/lib/net35/TechTalk.SpecFlow.dll"/>
       <include name="${project.path}/packages/FluentAssertions.*/lib/.NetFramework 4.0\FluentAssertions.dll"/>

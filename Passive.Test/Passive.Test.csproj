@@ -81,6 +81,7 @@
     <Compile Include="DynamicModelTests\CommonSteps.cs" />
     <Compile Include="DynamicModelTests\DynamicModelContext.cs" />
     <Compile Include="Models\Appliance.cs" />
+    <Compile Include="Utility\ShouldExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Passive\Passive.csproj">
