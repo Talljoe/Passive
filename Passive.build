@@ -109,7 +109,11 @@
   <target name="dist" depends="rebuild build-nuget-package build-dist-zip" />
   <target name="rebuild" depends="clean build" />
   <target name="build" depends="init all" />
-  <target name="publish" depends="dist get-git-revision">
+  <target name="check-publish-branch">
+    <property name="branch.name" value="master" />
+    <fail message="Must be on branch '${branch.name}' to publish. Currently on '${git::getbranch()}.'" if="${git::getbranch() != branch.name}" />
+  </target>
+  <target name="publish" depends="check-publish-branch dist get-git-revision">
     <exec program="${tools.nuget.path}\nuget.exe" commandline="push ${dist.path}\Passive.${build.version}.nupkg" />
     <github-addfile filename="${dist.path}\Passive.${build.version}.nupkg"
                     description="Passive Nuget package: v${build.version}"
