@@ -42,9 +42,11 @@
     <Compile Include="ColumnIgnoreAttribute.cs" />
     <Compile Include="ColumnNameAttribute.cs" />
     <Compile Include="DatabaseCapabilities.cs" />
+    <Compile Include="DatabaseDetector.cs" />
     <Compile Include="DynamicCommand.cs" />
     <Compile Include="DynamicDatabase.cs" />
     <Compile Include="DynamicModel.cs" />
+    <Compile Include="IDatabaseDetector.cs" />
     <Compile Include="ObjectExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

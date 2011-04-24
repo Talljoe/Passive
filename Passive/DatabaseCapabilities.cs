@@ -10,11 +10,13 @@ namespace Passive
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseCapabilities"/> class.
         /// </summary>
-        public DatabaseCapabilities(bool supportsRowNumber = false,
-                                    bool supportsOffset = false)
+        public DatabaseCapabilities(bool? supportsRowNumber = null,
+                                    bool? supportsOffset = null,
+                                    DatabaseCapabilities prototype = null)
         {
-            this.SupportsRowNumber = supportsRowNumber;
-            this.SupportsOffset = supportsOffset;
+            prototype = prototype ?? this;
+            this.SupportsRowNumber = supportsRowNumber ?? prototype.SupportsRowNumber;
+            this.SupportsOffset = supportsOffset ?? prototype.SupportsOffset;
         }
 
         /// <summary>
@@ -26,7 +28,7 @@ namespace Passive
         public bool SupportsRowNumber { get; private set; }
 
         /// <summary>
-        /// Gets a value indicating whether the database OFFSET/FETCH for pageing.
+        /// Gets a value indicating whether the database OFFSET/FETCH for paging.
         /// </summary>
         /// <value>
         ///   <c>true</c> if the database supports OFFSET/FETCH; otherwise, <c>false</c>.

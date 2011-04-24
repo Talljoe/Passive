@@ -24,7 +24,8 @@ namespace Passive
         /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
         /// </summary>
         /// <param name="connectionStringName">Name of the connection string.</param>
-        public DynamicDatabase(string connectionStringName = "")
+        /// <param name="databaseDetectors">Classes used to probe the database.</param>
+        public DynamicDatabase(string connectionStringName = "", IEnumerable<IDatabaseDetector> databaseDetectors = null)
         {
             if (connectionStringName == "")
             {
@@ -43,9 +44,15 @@ namespace Passive
                 throw new InvalidOperationException("Can't find a connection string with the name '" +
                                                     connectionStringName + "'");
             }
+            databaseDetectors = (databaseDetectors ?? Enumerable.Empty<DatabaseDetector>()).DefaultIfEmpty(new DatabaseDetector());
+
             this._factory = DbProviderFactories.GetFactory(_providerName);
             this._connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
-            this._capabilities = new Lazy<DatabaseCapabilities>(() => GetCapabilities(_providerName));
+            this._capabilities = new Lazy<DatabaseCapabilities>(
+                () => databaseDetectors.Select(dd => dd.Probe(this, _providerName, _connectionString))
+                                       .Where(dc => dc != null)
+                                       .FirstOrDefault()
+                                       ?? new DatabaseCapabilities());
         }
 
         /// <summary>
@@ -54,24 +61,6 @@ namespace Passive
         public DatabaseCapabilities Capabilities
         {
             get { return this._capabilities.Value; }
-        }
-
-        /// <summary>
-        /// Gets the database capabilities.
-        /// </summary>
-        protected virtual DatabaseCapabilities GetCapabilities(string factoryType)
-        {
-            switch(factoryType)
-            {
-                case "System.Data.SqlClient":
-                    return new DatabaseCapabilities(supportsRowNumber: true);
-
-                case "System.Data.SqlServerCe.4.0":
-                    return new DatabaseCapabilities(supportsOffset: true);
-
-                default:
-                    return new DatabaseCapabilities();
-            }
         }
 
         private DbCommand CreateDbCommand(DynamicCommand command, DbTransaction tx = null,

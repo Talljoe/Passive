@@ -1,0 +1,15 @@
+﻿// Copyright (c) 2011 Tall Ambitions, LLC
+// See included LICENSE for details.
+namespace Passive
+{
+    /// <summary>
+    /// Interface that describes a way of detecting the database
+    /// </summary>
+    public interface IDatabaseDetector
+    {
+        /// <summary>
+        /// Probes the specified database.
+        /// </summary>
+        DatabaseCapabilities Probe(DynamicDatabase database, string providerName, string connectionString);
+    }
+}
