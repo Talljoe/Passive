@@ -3,6 +3,7 @@
 namespace Passive.Test.Models
 {
     using System;
+    using System.Globalization;
 
     internal class Appliance : IEquatable<Appliance>
     {
@@ -64,6 +65,11 @@ namespace Passive.Test.Models
         public static bool operator !=(Appliance left, Appliance right)
         {
             return !Equals(left, right);
+        }
+
+        public override string ToString()
+        {
+            return String.Format(CultureInfo.CurrentCulture, "[{0}: {1}]", Id, Name);
         }
     }
 }

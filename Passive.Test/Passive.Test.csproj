@@ -56,7 +56,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="app.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="sqlexpress.config" />
+    <None Include="sqlce.config" />
     <None Include="DynamicModelTests\All.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>All.feature.cs</LastGenOutput>

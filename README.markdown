@@ -85,3 +85,10 @@ You can also send multiple objects to the database at once.
     }
     //Let's update these in bulk, in a transaction shall we?
     table.Save(drinks);
+
+Building and Testing
+--------------------
+
+To build run: `build` This will build the output files into `/build` and run all tests. Test results are output in `/build/tests/[configuration]/Results.html`. 
+
+Currently the SQL Server (Express) tests require a database called `PassiveTest` in `.\sqlexpress`. If you want to skip SQL tests run build with the parameter `-D:tests.configurations=sqlce`.

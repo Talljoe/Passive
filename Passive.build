@@ -11,7 +11,7 @@
   <property name="asminfo.filepath" value="${project.path}/Passive/AssemblyInfo.cs" />
   <property name="dist.path" value="${project.path}/dist"/>
   <property name="build.path" value="${project.path}/build"/>
-  <property name="tests.path" value="${build.path}/tests" />
+  <property name="tests.base.path" value="${build.path}/tests" />
   <property name="build.debug" value="PDBOnly" overwrite="false" />
   <property name="build.defines" value="" overwrite="false" />
   <property name="build.optimize" value="true" overwrite="false" />
@@ -26,6 +26,9 @@
 
   <property name="github.user" value="${git::readconfig('github.user')}" />
   <property name="github.token" value="${git::readconfig('github.token')}" />
+
+  <property name="tests.configurations" value="sqlce;sqlexpress" overwrite="false" />
+  <property name="tests.config.name" value="sqlce" overwrite="false" />
 
   <target name="passive" depends="init create-assembly-info">
     <csc noconfig="true"
@@ -89,7 +92,7 @@
         <patternset refid="test-dependencies" />
       </fileset>
     </copy>
-    <copy file="Passive.Test/app.config" tofile="${tests.path}/Passive.Test.dll.config" />
+    <copy file="Passive.Test/${tests.config.name}.config" tofile="${tests.path}/Passive.Test.dll.config" />
     <copy todir="${tests.path}/Data" flatten="true">
       <fileset>
         <include name="Passive.Test/Data/*" />
@@ -97,12 +100,18 @@
     </copy>
   </target>
 
-  <target name="test" depends="compile-tests">
+  <target name="test">
+    <foreach item="String" in="${tests.configurations}" delim=";" property="tests.config.name">
+      <property name="tests.path" value="${tests.base.path}/${tests.config.name}" />
+      <call target="test-core" />
+    </foreach>
+  </target>
+
+  <target name="test-core" depends="compile-tests">
     <exec program="${tools.xunit.path}/xunit.console.clr4.exe"
           workingdir="${tests.path}"
-          commandline="${tests.path}/Passive.Test.dll /html ${tests.path}/results.html"
+          commandline="${tests.path}/Passive.Test.dll /silent /html ${tests.path}/results.html"
           failonerror="true" />
-
   </target>
 
   <target name="all" depends="passive test" />

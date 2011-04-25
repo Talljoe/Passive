@@ -66,7 +66,6 @@ namespace Passive
         private DbCommand CreateDbCommand(DynamicCommand command, DbTransaction tx = null,
                                           DbConnection connection = null)
         {
-            Debug.WriteLine(command.Sql);
             var result = this._factory.CreateCommand();
             result.Connection = connection;
             result.CommandText = command.Sql;
