@@ -22,19 +22,19 @@ Scenario Outline: Getting some records
   Given I have a model for Appliance
   When I ask for page <page>
   And the page size is <page size>
-  Then I should get <count> results
-  And they should be a subset of all data
+  And I order rows by Id
+  Then they should have the ids <ids>
 
   Examples:
-    | page | page size | count |
-    | 1    | 2         | 2     |
-    | 2    | 2         | 2     |
-    | 3    | 2         | 0     |
-    | 1    | 3         | 3     |
-    | 2    | 3         | 1     |
-    | 3    | 3         | 0     |
-    | 1    | 4         | 4     |
-    | 2    | 4         | 0     |
+    | page | page size | count | ids     |
+    | 1    | 2         | 2     | 1,2     |
+    | 2    | 2         | 2     | 3,4     |
+    | 3    | 2         | 0     |         |
+    | 1    | 3         | 3     | 1,2,3   |
+    | 2    | 3         | 1     | 4       |
+    | 3    | 3         | 0     |         |
+    | 1    | 4         | 4     | 1,2,3,4 |
+    | 2    | 4         | 0     |         |
 
 Scenario Outline: Filtering records by an object
   Given I have a model for Appliance

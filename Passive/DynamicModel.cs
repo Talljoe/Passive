@@ -325,7 +325,7 @@ namespace Passive
         protected virtual string GetPaging(string tableName, string columns, string orderBy, string where, int pageSize, int currentPage)
         {
             var pageStart = (currentPage - 1) * pageSize;
-            const string rowNumberFormat = "SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY {1}) AS [Row___], {0} FROM {2}) AS Paged {3}";
+            const string rowNumberFormat = "SELECT {0} FROM (SELECT ROW_NUMBER() OVER (ORDER BY {1}) AS [Row___], {0} FROM {2} {3}) AS Paged WHERE [Row___] > {4} AND [Row___] <= ({4} + {5})";
             const string offsetFormat = "SELECT {0} FROM {2} {3} ORDER BY {1} OFFSET {4} ROWS FETCH NEXT {5} ROWS ONLY";
             string format;
             if(this.Database.Capabilities.SupportsOffset)
@@ -335,8 +335,6 @@ namespace Passive
             else if(this.Database.Capabilities.SupportsRowNumber)
             {
                 format = rowNumberFormat;
-                where = String.IsNullOrWhiteSpace(where) ? " WHERE " : where + " AND ";
-                where += String.Format("[Row___] >= {0} AND [Row___] <= {1}", pageStart, (pageStart + pageSize));
             }
             else
             {

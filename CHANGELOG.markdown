@@ -1,3 +1,7 @@
+0.1.8.0
+-------
+* Fixed error in SQL paging where it would fetch an extra row at the beginning.
+
 0.1.3.0
 -------
 * Added missing "args" parameter to DynamicModel.Single() to fully support the where clause.

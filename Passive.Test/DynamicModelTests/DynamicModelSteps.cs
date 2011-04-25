@@ -206,6 +206,13 @@ namespace Passive.Test.DynamicModelTests
             var result = Result.Select(d => ((object) d).ToDictionary());
             result.ForEach(d => d.Keys.Should().BeEquivalentTo(expectedColumns));
         }
+
+        [Then(@"they should have the ids ((?:\d+\s*,\s*)*\d+)?")]
+        public void ThenTheyShouldHaveTheIds(string ids)
+        {
+            var expected = ids.Split(new[] {',', ' '}, StringSplitOptions.RemoveEmptyEntries).Select(Int32.Parse);
+            ApplianceResult.Select(a => a.Id).Should().Equal(expected);
+        }
         
         #endregion
 

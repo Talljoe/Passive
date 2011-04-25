@@ -116,15 +116,15 @@ this.ScenarioSetup(scenarioInfo);
         [Xunit.Extensions.TheoryAttribute()]
         [Xunit.TraitAttribute("FeatureTitle", "DynamicModel Paged()")]
         [Xunit.TraitAttribute("Description", "Getting some records")]
-        [Xunit.Extensions.InlineDataAttribute("1", "2", "2", new string[0])]
-        [Xunit.Extensions.InlineDataAttribute("2", "2", "2", new string[0])]
-        [Xunit.Extensions.InlineDataAttribute("3", "2", "0", new string[0])]
-        [Xunit.Extensions.InlineDataAttribute("1", "3", "3", new string[0])]
-        [Xunit.Extensions.InlineDataAttribute("2", "3", "1", new string[0])]
-        [Xunit.Extensions.InlineDataAttribute("3", "3", "0", new string[0])]
-        [Xunit.Extensions.InlineDataAttribute("1", "4", "4", new string[0])]
-        [Xunit.Extensions.InlineDataAttribute("2", "4", "0", new string[0])]
-        public virtual void GettingSomeRecords(string page, string pageSize, string count, string[] exampleTags)
+        [Xunit.Extensions.InlineDataAttribute("1", "2", "2", "1,2", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "2", "2", "3,4", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("3", "2", "0", "", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("1", "3", "3", "1,2,3", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "3", "1", "4", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("3", "3", "0", "", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("1", "4", "4", "1,2,3,4", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "4", "0", "", new string[0])]
+        public virtual void GettingSomeRecords(string page, string pageSize, string count, string ids, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Getting some records", exampleTags);
 #line 21
@@ -136,9 +136,9 @@ this.ScenarioSetup(scenarioInfo);
 #line 24
   testRunner.And(string.Format("the page size is {0}", pageSize));
 #line 25
-  testRunner.Then(string.Format("I should get {0} results", count));
+  testRunner.And("I order rows by Id");
 #line 26
-  testRunner.And("they should be a subset of all data");
+  testRunner.Then(string.Format("they should have the ids {0}", ids));
 #line hidden
             testRunner.CollectScenarioErrors();
         }
