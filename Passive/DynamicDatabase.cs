@@ -16,9 +16,9 @@ namespace Passive
     /// </summary>
     public class DynamicDatabase
     {
-        private readonly string _connectionString;
-        private readonly DbProviderFactory _factory;
-        private readonly Lazy<DatabaseCapabilities> _capabilities;
+        private string _connectionString;
+        private DbProviderFactory _factory;
+        private Lazy<DatabaseCapabilities> _capabilities;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
@@ -43,10 +43,23 @@ namespace Passive
                 throw new InvalidOperationException("Can't find a connection string with the name '" +
                                                     connectionStringName + "'");
             }
-            this._factory = DbProviderFactories.GetFactory(_providerName);
-            this._connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
-            this._capabilities = new Lazy<DatabaseCapabilities>(() => GetCapabilities(_providerName));
+        	Initialize(ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString, _providerName);
         }
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
+		/// </summary>
+		/// <param name="connectionString">Database connection string</param>
+		/// <param name="providerName">Invariant name of the database provider</param>
+		public DynamicDatabase(string connectionString, string providerName)
+		{
+			Initialize(connectionString, providerName);
+		}
+		private void Initialize(string connectionString, string providerName)
+		{
+			_factory = DbProviderFactories.GetFactory(providerName);
+			_connectionString = connectionString;
+			_capabilities = new Lazy<DatabaseCapabilities>(() => GetCapabilities(providerName));
+		}
 
         /// <summary>
         /// Gets the capabilities for this database.
