@@ -14,7 +14,7 @@ namespace Passive
         /// <summary>
         /// Probes the specified database.
         /// </summary>
-        public DatabaseCapabilities Probe(DynamicDatabase database, string providerName, string connectionString)
+        public DatabaseDialect Probe(DynamicDatabase database, string providerName, string connectionString)
         {
             switch (providerName)
             {
@@ -22,14 +22,14 @@ namespace Passive
                     return ProbeSqlServer(database);
 
                 case "System.Data.SqlServerCe.4.0":
-                    return new DatabaseCapabilities(supportsOffset: true);
+                    return new SqlCe4Dialect();
 
                 default:
-                    return new DatabaseCapabilities();
+                    return new DatabaseDialect();
             }
         }
 
-        private static DatabaseCapabilities ProbeSqlServer(DynamicDatabase database)
+        private static DatabaseDialect ProbeSqlServer(DynamicDatabase database)
         {
             string versionString;
             try
@@ -44,10 +44,7 @@ namespace Passive
             int version;
             if (Int32.TryParse(versionString.Split('.').First(), out version) && version > 0)
             {
-                var supportsRowNumber = version >= 8; // SQL SERVER 2005
-                var supportsOffset = version >= 11; // DENALI
-
-                return new DatabaseCapabilities(supportsRowNumber, supportsOffset);
+                return new SqlServerDialect(version);
             }
 
             return null;

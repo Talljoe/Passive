@@ -1,6 +1,7 @@
-0.1.8.0
--------
+0.1.10.0
+--------
 * Fixed error in SQL paging where it would fetch an extra row at the beginning.
+* Removed DatabaseCapabilities and replaced with new dialect classes.
 
 0.1.3.0
 -------

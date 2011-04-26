@@ -10,6 +10,6 @@ namespace Passive
         /// <summary>
         /// Probes the specified database.
         /// </summary>
-        DatabaseCapabilities Probe(DynamicDatabase database, string providerName, string connectionString);
+        DatabaseDialect Probe(DynamicDatabase database, string providerName, string connectionString);
     }
 }

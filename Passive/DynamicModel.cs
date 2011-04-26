@@ -125,7 +125,7 @@ namespace Passive
         /// </summary>
         protected virtual DynamicCommand CreateInsertCommand(object o, object whitelist = null)
         {
-            const string stub = "INSERT INTO {0} ({1}) \r\n VALUES ({2}); SELECT @@IDENTITY AS NewID";
+            const string stub = "INSERT INTO {0} ({1}) \r\n VALUES ({2}); {3}";
             var items = FilterItems(o, whitelist).ToList();
             if (items.Any())
             {
@@ -133,7 +133,7 @@ namespace Passive
                 var vals = string.Join(",", items.Select((_, i) => "@" + i.ToString()));
                 return new DynamicCommand
                            {
-                               Sql = string.Format(stub, this.TableName, keys, vals),
+                               Sql = string.Format(stub, this.TableName, keys, vals, this.Database.Dialect.GetIdentitySql()),
                                Arguments = items.Select(item => item.Value),
                            };
             }
@@ -293,7 +293,7 @@ namespace Passive
             {
                 orderBy = this.PrimaryKeyField;
             }
-            var sql = this.GetPaging(this.TableName, GetColumns(columns), orderBy, whereInfo.Sql, pageSize, currentPage);
+            var sql = this.Database.Dialect.GetPagingSql(this.TableName, GetColumns(columns), orderBy, whereInfo.Sql, pageSize, currentPage);
             var command = new DynamicCommand {Sql = sql, Arguments = whereInfo.Args};
             var queryCommand = command;
             var command1 = new DynamicCommand {Sql = countSql, Arguments = whereInfo.Args};
@@ -317,31 +317,6 @@ namespace Passive
             var whereInfo = this.GetWhereInfo(where, key, args);
             var command = new DynamicCommand {Sql = sql + whereInfo.Sql, Arguments = whereInfo.Args};
             return this.Database.Fetch(command).FirstOrDefault();
-        }
-
-        /// <summary>
-        /// Gets the SQL for a paging operation
-        /// </summary>
-        protected virtual string GetPaging(string tableName, string columns, string orderBy, string where, int pageSize, int currentPage)
-        {
-            var pageStart = (currentPage - 1) * pageSize;
-            const string rowNumberFormat = "SELECT {0} FROM (SELECT ROW_NUMBER() OVER (ORDER BY {1}) AS [Row___], {0} FROM {2} {3}) AS Paged WHERE [Row___] > {4} AND [Row___] <= ({4} + {5})";
-            const string offsetFormat = "SELECT {0} FROM {2} {3} ORDER BY {1} OFFSET {4} ROWS FETCH NEXT {5} ROWS ONLY";
-            string format;
-            if(this.Database.Capabilities.SupportsOffset)
-            {
-                format = offsetFormat;
-            }
-            else if(this.Database.Capabilities.SupportsRowNumber)
-            {
-                format = rowNumberFormat;
-            }
-            else
-            {
-                throw new NotSupportedException("Paging is not supported for this server.");
-            }
-
-            return String.Format(format, GetColumns(columns), orderBy, this.TableName, where, pageStart, pageSize);
         }
 
         private WhereInfo GetWhereInfo(object where, object key, IEnumerable<object> args)

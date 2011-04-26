@@ -7,7 +7,6 @@ namespace Passive
     using System.Configuration;
     using System.Data;
     using System.Data.Common;
-    using System.Diagnostics;
     using System.Dynamic;
     using System.Linq;
 
@@ -18,7 +17,7 @@ namespace Passive
     {
         private readonly string _connectionString;
         private readonly DbProviderFactory _factory;
-        private readonly Lazy<DatabaseCapabilities> _capabilities;
+        private readonly Lazy<DatabaseDialect> _dialect;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
@@ -48,19 +47,19 @@ namespace Passive
 
             this._factory = DbProviderFactories.GetFactory(_providerName);
             this._connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
-            this._capabilities = new Lazy<DatabaseCapabilities>(
+            this._dialect = new Lazy<DatabaseDialect>(
                 () => databaseDetectors.Select(dd => dd.Probe(this, _providerName, _connectionString))
                                        .Where(dc => dc != null)
                                        .FirstOrDefault()
-                                       ?? new DatabaseCapabilities());
+                                       ?? new DatabaseDialect());
         }
 
         /// <summary>
         /// Gets the capabilities for this database.
         /// </summary>
-        public DatabaseCapabilities Capabilities
+        public DatabaseDialect Dialect
         {
-            get { return this._capabilities.Value; }
+            get { return this._dialect.Value; }
         }
 
         private DbCommand CreateDbCommand(DynamicCommand command, DbTransaction tx = null,
