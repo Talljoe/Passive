@@ -15,9 +15,9 @@ namespace Passive
     /// </summary>
     public class DynamicDatabase
     {
-        private readonly string _connectionString;
-        private readonly DbProviderFactory _factory;
-        private readonly Lazy<DatabaseDialect> _dialect;
+        private string _connectionString;
+        private DbProviderFactory _factory;
+        private Lazy<DatabaseDialect> _dialect;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
@@ -43,12 +43,29 @@ namespace Passive
                 throw new InvalidOperationException("Can't find a connection string with the name '" +
                                                     connectionStringName + "'");
             }
+
+            Initialize(ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString, _providerName, databaseDetectors);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
+        /// </summary>
+        /// <param name="connectionString">Database connection string</param>
+        /// <param name="providerName">Invariant name of the database provider</param>
+        /// <param name="databaseDetectors">Classes used to probe the database.</param>
+        public DynamicDatabase(string connectionString, string providerName, IEnumerable<IDatabaseDetector> databaseDetectors = null)
+        {
+            Initialize(connectionString, providerName, databaseDetectors);
+        }
+
+        private void Initialize(string connectionString, string providerName, IEnumerable<IDatabaseDetector> databaseDetectors = null)
+        {
             databaseDetectors = (databaseDetectors ?? Enumerable.Empty<DatabaseDetector>()).DefaultIfEmpty(new DatabaseDetector());
 
-            this._factory = DbProviderFactories.GetFactory(_providerName);
-            this._connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
+            this._factory = DbProviderFactories.GetFactory(providerName);
+            this._connectionString = connectionString;
             this._dialect = new Lazy<DatabaseDialect>(
-                () => databaseDetectors.Select(dd => dd.Probe(this, _providerName, _connectionString))
+                () => databaseDetectors.Select(dd => dd.Probe(this, providerName, connectionString))
                                        .Where(dc => dc != null)
                                        .FirstOrDefault()
                                        ?? new DatabaseDialect());
