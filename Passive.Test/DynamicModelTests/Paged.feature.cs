@@ -17,23 +17,23 @@ namespace Passive.Test.DynamicModelTests
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "1.6.1.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class DynamicModelAllFeature : Xunit.IUseFixture<DynamicModelAllFeature.FixtureData>, System.IDisposable
+    public partial class DynamicModelPagedFeature : Xunit.IUseFixture<DynamicModelPagedFeature.FixtureData>, System.IDisposable
     {
         
         private static TechTalk.SpecFlow.ITestRunner testRunner;
         
-#line 1 "All.feature"
+#line 1 "Paged.feature"
 #line hidden
         
         public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "DynamicModel All()", "In order to access data\r\nAs a developer\r\nI want to get all rows from the database" +
-                    "", GenerationTargetLanguage.CSharp, ((string[])(null)));
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "DynamicModel Paged()", "In order to reduce the load on my database\r\nAs a developer\r\nI want to get page re" +
+                    "sults", GenerationTargetLanguage.CSharp, ((string[])(null)));
             testRunner.OnFeatureStart(featureInfo);
         }
         
-        public virtual void SetFixture(DynamicModelAllFeature.FixtureData fixtureData)
+        public virtual void SetFixture(DynamicModelPagedFeature.FixtureData fixtureData)
         {
         }
         
@@ -94,7 +94,7 @@ namespace Passive.Test.DynamicModelTests
         }
         
         [Xunit.FactAttribute()]
-        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel Paged()")]
         [Xunit.TraitAttribute("Description", "Getting all records")]
         public virtual void GettingAllRecords()
         {
@@ -104,61 +104,47 @@ this.ScenarioSetup(scenarioInfo);
 #line 16
   testRunner.Given("I have a model for Appliance");
 #line 17
-  testRunner.When("I ask for all rows");
+  testRunner.When("I ask for page 1");
 #line 18
+  testRunner.And("the page size is 20");
+#line 19
   testRunner.Then("I should get all items");
 #line hidden
             testRunner.CollectScenarioErrors();
         }
         
         [Xunit.Extensions.TheoryAttribute()]
-        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel Paged()")]
         [Xunit.TraitAttribute("Description", "Getting some records")]
-        [Xunit.Extensions.InlineDataAttribute("1", new string[0])]
-        [Xunit.Extensions.InlineDataAttribute("2", new string[0])]
-        [Xunit.Extensions.InlineDataAttribute("3", new string[0])]
-        [Xunit.Extensions.InlineDataAttribute("4", new string[0])]
-        public virtual void GettingSomeRecords(string n, string[] exampleTags)
+        [Xunit.Extensions.InlineDataAttribute("1", "2", "2", "1,2", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "2", "2", "3,4", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("3", "2", "0", "", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("1", "3", "3", "1,2,3", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "3", "1", "4", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("3", "3", "0", "", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("1", "4", "4", "1,2,3,4", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "4", "0", "", new string[0])]
+        public virtual void GettingSomeRecords(string page, string pageSize, string count, string ids, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Getting some records", exampleTags);
-#line 20
-this.ScenarioSetup(scenarioInfo);
 #line 21
-  testRunner.Given("I have a model for Appliance");
-#line 22
-  testRunner.When("I ask for all rows");
-#line 23
-  testRunner.And(string.Format("I limit the query to {0} rows", n));
-#line 24
-  testRunner.Then(string.Format("I should only have {0} results", n));
-#line 25
-  testRunner.And("they should be a subset of all data");
-#line hidden
-            testRunner.CollectScenarioErrors();
-        }
-        
-        [Xunit.FactAttribute()]
-        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
-        [Xunit.TraitAttribute("Description", "Asking for too many records")]
-        public virtual void AskingForTooManyRecords()
-        {
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Asking for too many records", ((string[])(null)));
-#line 34
 this.ScenarioSetup(scenarioInfo);
-#line 35
+#line 22
   testRunner.Given("I have a model for Appliance");
-#line 36
-  testRunner.When("I ask for all rows");
-#line 37
-  testRunner.And("I limit the query to more rows than are in the database");
-#line 38
-  testRunner.Then("I should get all items");
+#line 23
+  testRunner.When(string.Format("I ask for page {0}", page));
+#line 24
+  testRunner.And(string.Format("the page size is {0}", pageSize));
+#line 25
+  testRunner.And("I order rows by Id");
+#line 26
+  testRunner.Then(string.Format("they should have the ids {0}", ids));
 #line hidden
             testRunner.CollectScenarioErrors();
         }
         
         [Xunit.Extensions.TheoryAttribute()]
-        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel Paged()")]
         [Xunit.TraitAttribute("Description", "Filtering records by an object")]
         [Xunit.Extensions.InlineDataAttribute("Stainless Steel", "1", new string[0])]
         [Xunit.Extensions.InlineDataAttribute("Red", "1", new string[0])]
@@ -167,40 +153,42 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void FilteringRecordsByAnObject(string value, string count, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Filtering records by an object", exampleTags);
-#line 40
+#line 39
 this.ScenarioSetup(scenarioInfo);
-#line 41
+#line 40
   testRunner.Given("I have a model for Appliance");
+#line 41
+  testRunner.When("I ask for page 1");
 #line 42
-  testRunner.When("I ask for all rows");
-#line 43
   testRunner.And(string.Format("I only want appliances colored {0}", value));
-#line 44
+#line 43
   testRunner.Then(string.Format("I should only have {0} results", count));
-#line 45
+#line 44
   testRunner.And(string.Format("I should only get {0}-colored appliances", value));
 #line hidden
             testRunner.CollectScenarioErrors();
         }
         
         [Xunit.Extensions.TheoryAttribute()]
-        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel Paged()")]
         [Xunit.TraitAttribute("Description", "Filtering records by string")]
-        [Xunit.Extensions.InlineDataAttribute("6", "4", new string[0])]
-        [Xunit.Extensions.InlineDataAttribute("7", "3", new string[0])]
-        [Xunit.Extensions.InlineDataAttribute("10", "3", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("6", "2", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("7", "2", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("10", "2", new string[0])]
         [Xunit.Extensions.InlineDataAttribute("15", "2", new string[0])]
         [Xunit.Extensions.InlineDataAttribute("20", "1", new string[0])]
         [Xunit.Extensions.InlineDataAttribute("30", "0", new string[0])]
         public virtual void FilteringRecordsByString(string value, string count, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Filtering records by string", exampleTags);
-#line 54
+#line 53
 this.ScenarioSetup(scenarioInfo);
-#line 55
+#line 54
   testRunner.Given("I have a model for Appliance");
+#line 55
+  testRunner.When("I ask for page 1");
 #line 56
-  testRunner.When("I ask for all rows");
+  testRunner.And("the page size is 2");
 #line 57
   testRunner.And(string.Format("I only want appliances with more than {0} amps", value));
 #line 58
@@ -212,7 +200,7 @@ this.ScenarioSetup(scenarioInfo);
         }
         
         [Xunit.Extensions.TheoryAttribute()]
-        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel Paged()")]
         [Xunit.TraitAttribute("Description", "Executing a query with order by")]
         [Xunit.Extensions.InlineDataAttribute("id", new string[0])]
         [Xunit.Extensions.InlineDataAttribute("name", new string[0])]
@@ -225,7 +213,7 @@ this.ScenarioSetup(scenarioInfo);
 #line 72
   testRunner.Given("I have a model for Appliance");
 #line 73
-  testRunner.When("I ask for all rows");
+  testRunner.When("I ask for page 1");
 #line 74
   testRunner.And(string.Format("I order rows by {0}", orderby));
 #line 75
@@ -235,7 +223,7 @@ this.ScenarioSetup(scenarioInfo);
         }
         
         [Xunit.Extensions.TheoryAttribute()]
-        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel Paged()")]
         [Xunit.TraitAttribute("Description", "Executing a query with descending order by")]
         [Xunit.Extensions.InlineDataAttribute("id", new string[0])]
         [Xunit.Extensions.InlineDataAttribute("name", new string[0])]
@@ -248,7 +236,7 @@ this.ScenarioSetup(scenarioInfo);
 #line 84
   testRunner.Given("I have a model for Appliance");
 #line 85
-  testRunner.When("I ask for all rows");
+  testRunner.When("I ask for page 1");
 #line 86
   testRunner.And(string.Format("I order rows by {0} desc", orderby));
 #line 87
@@ -258,7 +246,7 @@ this.ScenarioSetup(scenarioInfo);
         }
         
         [Xunit.FactAttribute()]
-        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel Paged()")]
         [Xunit.TraitAttribute("Description", "Selecting a subset of columns")]
         public virtual void SelectingASubsetOfColumns()
         {
@@ -268,7 +256,7 @@ this.ScenarioSetup(scenarioInfo);
 #line 96
   testRunner.Given("I have a model for Appliance");
 #line 97
-  testRunner.When("I ask for all rows");
+  testRunner.When("I ask for page 1");
 #line 98
   testRunner.And("I ask for the columns \"Id, Name\"");
 #line 99
@@ -278,7 +266,7 @@ this.ScenarioSetup(scenarioInfo);
         }
         
         [Xunit.FactAttribute()]
-        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel All()")]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel Paged()")]
         [Xunit.TraitAttribute("Description", "Selecting an invalid column")]
         public virtual void SelectingAnInvalidColumn()
         {
@@ -288,7 +276,7 @@ this.ScenarioSetup(scenarioInfo);
 #line 102
   testRunner.Given("I have a model for Appliance");
 #line 103
-  testRunner.When("I ask for all rows");
+  testRunner.When("I ask for page 1");
 #line 104
   testRunner.And("I ask for an invalid column");
 #line 105
@@ -304,12 +292,12 @@ this.ScenarioSetup(scenarioInfo);
             
             public FixtureData()
             {
-                DynamicModelAllFeature.FeatureSetup();
+                DynamicModelPagedFeature.FeatureSetup();
             }
             
             void System.IDisposable.Dispose()
             {
-                DynamicModelAllFeature.FeatureTearDown();
+                DynamicModelPagedFeature.FeatureTearDown();
             }
         }
     }

@@ -31,8 +31,9 @@ namespace Passive
         public DynamicModel(IDynamicDatabase database, string tableName = null, string primaryKeyField = null)
         {
             this.Database = database ?? new DynamicDatabase();
-            this.TableName = String.IsNullOrEmpty(tableName) ? this.GetType().Name : tableName;
+            this.TableName = String.IsNullOrWhiteSpace(tableName) ? this.GetType().Name : tableName;
             this.PrimaryKeyField = String.IsNullOrEmpty(primaryKeyField) ? "ID" : primaryKeyField;
+            this.PrimaryKeyField = string.IsNullOrWhiteSpace(primaryKeyField) ? "ID" : primaryKeyField;
         }
 
         /// <summary>
@@ -125,7 +126,7 @@ namespace Passive
         /// </summary>
         protected virtual DynamicCommand CreateInsertCommand(object o, object whitelist = null)
         {
-            const string stub = "INSERT INTO {0} ({1}) \r\n VALUES ({2}); SELECT @@IDENTITY AS NewID";
+            const string stub = "INSERT INTO {0} ({1}) \r\n VALUES ({2}); {3}";
             var items = FilterItems(o, whitelist).ToList();
             if (items.Any())
             {
@@ -133,7 +134,7 @@ namespace Passive
                 var vals = string.Join(",", items.Select((_, i) => "@" + i.ToString()));
                 return new DynamicCommand
                            {
-                               Sql = string.Format(stub, this.TableName, keys, vals),
+                               Sql = string.Format(stub, this.TableName, keys, vals, this.Database.Dialect.GetIdentitySql()),
                                Arguments = items.Select(item => item.Value),
                            };
             }
@@ -226,41 +227,13 @@ namespace Passive
             return result;
         }
 
-        private DynamicCommand BuildCommand(string sql, object key = null, object where = null, params object[] args)
-        {
-            var command = new DynamicCommand {Sql = sql};
-            if (key != null)
-            {
-                where = new Dictionary<string, object> {{this.PrimaryKeyField, key}};
-            }
-            if (where == null)
-            {
-                return command;
-            }
-            var whereString = where as string;
-            if (whereString != null)
-            {
-                var whereRegex = new Regex(@"^where ", RegexOptions.IgnoreCase);
-                var keyword = whereRegex.IsMatch(sql.Trim()) ? " AND " : " WHERE ";
-                command.Sql += keyword + whereString.Replace(whereString.Trim(), String.Empty);
-                command.Arguments = (command.Arguments ?? Enumerable.Empty<object>()).Concat(args);
-            }
-            else
-            {
-                var dict = where.ToDictionary();
-                command.Sql += " WHERE " +
-                               String.Join(" AND ", dict.Select((kvp, i) => String.Format("{0} = @{1}", kvp.Key, i)));
-                command.Arguments = dict.Select(kvp => kvp.Value).ToArray();
-            }
-            return command;
-        }
-
         /// <summary>
         ///   Removes one or more records from the DB according to the passed-in WHERE
         /// </summary>
         protected virtual DynamicCommand CreateDeleteCommand(object key = null, object where = null, params object[] args)
         {
-            return this.BuildCommand(string.Format("DELETE FROM {0}", this.TableName), key, where, args);
+            var command = new DynamicCommand {Sql = string.Format("DELETE FROM {0}", this.TableName), Arguments = args};
+            return command;
         }
 
         /// <summary>
@@ -312,18 +285,20 @@ namespace Passive
         /// <summary>
         ///   Returns a single row from the database
         /// </summary>
-        public virtual dynamic Single(object key = null, object where = null, object columns = null)
+        public virtual dynamic Single(object key = null, object where = null, object columns = null, params object[] args)
         {
-            return this.DoSingle(key, where, columns, command => this.Database.Query(command).FirstOrDefault());
+            return this.DoSingle(key, where, columns, command => this.Database.Query(command).FirstOrDefault(), args);
         }
 
         /// <summary>
         ///   Does the work for fetching a single item.
         /// </summary>
-        protected virtual T DoSingle<T>(object key, object where, object columns, Func<DynamicCommand, T> work)
+        protected virtual T DoSingle<T>(object key, object where, object columns, Func<DynamicCommand, T> work, object[] args)
         {
-            var sql = string.Format("SELECT {0} FROM {1}", GetColumns(columns), this.TableName);
-            return work(this.BuildCommand(sql, key, where));
+             var sql = string.Format("SELECT {0} FROM {1}", GetColumns(columns), this.TableName);
+             var whereInfo = this.GetWhereInfo(where, key, args);
+             var command = new DynamicCommand {Sql = sql + whereInfo.Sql, Arguments = whereInfo.Args};
+            return work(command);
         }
 
         /// <summary>
@@ -333,8 +308,10 @@ namespace Passive
         {
             var sql = String.Format(limit > 0 ? "SELECT TOP " + limit + " {0} FROM {1}" : "SELECT {0} FROM {1}",
                                     GetColumns(columns), this.TableName);
-            var command = this.BuildCommand(sql, where: where, args: args);
-            if (!String.IsNullOrEmpty(orderBy))
+            var whereInfo = this.GetWhereInfo(where, null, args);
+            var command1 = new DynamicCommand {Sql = sql + whereInfo.Sql, Arguments = whereInfo.Args};
+            var command = command1;
+            if (!String.IsNullOrWhiteSpace(orderBy))
             {
                 command.Sql += (orderBy.Trim().StartsWith("order by", StringComparison.CurrentCultureIgnoreCase)
                                     ? " "
@@ -349,18 +326,17 @@ namespace Passive
         protected virtual dynamic DoPaged(object where, string orderBy, object columns, int pageSize,
                          int currentPage, object[] args, Func<DynamicCommand, DynamicCommand, dynamic> work)
         {
-            var countSql = string.Format("SELECT COUNT({0}) FROM {1}", this.PrimaryKeyField, this.TableName);
-            if (String.IsNullOrEmpty(orderBy))
+            var whereInfo = GetWhereInfo(where, null, args);
+            var countSql = string.Format("SELECT COUNT({0}) FROM {1} {2}", this.PrimaryKeyField, this.TableName, whereInfo.Sql);
+            if (String.IsNullOrWhiteSpace(orderBy))
             {
                 orderBy = this.PrimaryKeyField;
             }
-            var sql =
-                string.Format("SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY {1}) AS Row, {0} FROM {2}) AS Paged",
-                              GetColumns(columns), orderBy, this.TableName);
-            var pageStart = (currentPage - 1) * pageSize;
-            sql += string.Format(" WHERE Row >={0} AND Row <={1}", pageStart, (pageStart + pageSize));
-            var queryCommand = this.BuildCommand(sql, where: where, args: args);
-            var whereCommand = this.BuildCommand(countSql, where: where, args: args);
+            var sql = this.Database.Dialect.GetPagingSql(this.TableName, GetColumns(columns), orderBy, whereInfo.Sql, pageSize, currentPage);
+            var command = new DynamicCommand {Sql = sql, Arguments = whereInfo.Args};
+            var queryCommand = command;
+            var command1 = new DynamicCommand {Sql = countSql, Arguments = whereInfo.Args};
+            var whereCommand = command1;
             return work(whereCommand, queryCommand);
         }
 
@@ -376,6 +352,46 @@ namespace Passive
                 TotalPages = (totalRecords + (pageSize - 1)) / pageSize,
                 Items = items
             }.ToExpando();
+        }
+
+        private WhereInfo GetWhereInfo(object where, object key, IEnumerable<object> args)
+        {
+            if (key != null)
+            {
+                where = new Dictionary<string, object> { { this.PrimaryKeyField, key } };
+            }
+            var whereString = where as string;
+            if (whereString != null)
+            {
+                if (!Regex.IsMatch(whereString.Trim(), "^where ", RegexOptions.IgnoreCase))
+                {
+                    whereString = "WHERE " + whereString;
+                }
+                return new WhereInfo(" " + whereString.TrimStart(' '), args);
+            }
+
+            if (where != null)
+            {
+                var dict = where.ToDictionary();
+
+                var sql = " WHERE " +
+                          String.Join(" AND ", dict.Select((kvp, i) => String.Format("{0} = @{1}", kvp.Key, i)));
+                return new WhereInfo(sql, dict.Select(kvp => kvp.Value).ToArray());
+            }
+
+            return new WhereInfo(String.Empty, Enumerable.Empty<object>());
+        }
+
+        private class WhereInfo
+        {
+            public WhereInfo(string sql, IEnumerable<object> args)
+            {
+                this.Sql = sql;
+                this.Args = args;
+            }
+
+            public string Sql { get; private set; }
+            public IEnumerable<object> Args { get; private set; }
         }
     }
 }

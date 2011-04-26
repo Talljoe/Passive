@@ -67,10 +67,11 @@ namespace Passive.Async
         /// <summary>
         ///   Returns a single row from the database
         /// </summary>
-        public virtual Task<dynamic> SingleAsync(object key = null, object where = null, object columns = null)
+        public virtual Task<dynamic> SingleAsync(object key = null, object where = null, object columns = null, params object[] args)
         {
-            return this.DoSingle(key, where, columns, 
-                command => this.Database.FetchAsync(command).Select(result => result.FirstOrDefault()));
+            return this.DoSingle(key, where, columns,
+                command => this.Database.FetchAsync(command).Select(result => result.FirstOrDefault()),
+                args);
         }
     }
 }

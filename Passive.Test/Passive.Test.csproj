@@ -51,12 +51,27 @@
     <Reference Include="xunit">
       <HintPath>..\packages\xunit.1.8.0.1545\lib\xunit.dll</HintPath>
     </Reference>
+    <Reference Include="xunit.extensions">
+      <HintPath>..\packages\xunit.extensions.1.8.0.1545\lib\xunit.extensions.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="app.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="sqlexpress.config" />
+    <None Include="sqlce.config" />
     <None Include="DynamicModelTests\All.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>All.feature.cs</LastGenOutput>
+    </None>
+    <None Include="DynamicModelTests\Paged.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>Paged.feature.cs</LastGenOutput>
+    </None>
+    <None Include="DynamicModelTests\Single.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>Single.feature.cs</LastGenOutput>
     </None>
     <None Include="packages.config" />
   </ItemGroup>
@@ -69,14 +84,26 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DynamicModelTests\AllSteps.cs" />
+    <Compile Include="DynamicModelTests\DynamicModelSteps.cs" />
     <Compile Include="DynamicModelTests\All.feature.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>All.feature</DependentUpon>
     </Compile>
     <Compile Include="DynamicModelTests\CommonSteps.cs" />
+    <Compile Include="DynamicModelTests\DynamicModelContext.cs" />
+    <Compile Include="DynamicModelTests\Paged.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Paged.feature</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicModelTests\Single.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Single.feature</DependentUpon>
+    </Compile>
     <Compile Include="Models\Appliance.cs" />
+    <Compile Include="Utility\ShouldExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Passive\Passive.csproj">

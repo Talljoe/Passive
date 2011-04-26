@@ -1,7 +1,7 @@
-﻿Feature: DynamicModel All()
+﻿Feature: DynamicModel Single()
   In order to access data
   As a developer
-  I want to get all rows from the database
+  I want to get a single row from the database
 
 Background:
   Given a database with the following appliances
@@ -12,94 +12,60 @@ Background:
      | 4  | Microwave | White           | 20   |
      #-----------------------------------------#
 
-Scenario: Getting all records
+Scenario: Getting a record without any filtering
   Given I have a model for Appliance
-  When I ask for all rows
-  Then I should get all items
+  When I ask for a single row
+  Then I should get 1 result
+  And it should be a subset of all data
 
-Scenario Outline: Getting some records
+Scenario: Getting a record by id
   Given I have a model for Appliance
-  When I ask for all rows
-  And I limit the query to <n> rows
-  Then I should only have <n> results
-  And they should be a subset of all data
+  When I ask for the record with the id of 2
+  Then I should get appliance #2
 
-  Examples:
-    |n|
-    |1|
-    |2|
-    |3|
-    |4|
-
-Scenario: Asking for too many records
+Scenario: Getting a record that doesn't exist
   Given I have a model for Appliance
-  When I ask for all rows
-  And I limit the query to more rows than are in the database
-  Then I should get all items
+  When I ask for the record with the id of 400
+  Then I should get no results
 
 Scenario Outline: Filtering records by an object
   Given I have a model for Appliance
-  When I ask for all rows
+  When I ask for a single row
   And I only want appliances colored <value>
-  Then I should only have <count> results
+  Then I should get <count> results
   And I should only get <value>-colored appliances
 
   Examples:
   | value           | count |
   | Stainless Steel | 1     |
   | Red             | 1     |
-  | White           | 2     |
+  | White           | 1     |
   | Green           | 0     |
 
 Scenario Outline: Filtering records by string
   Given I have a model for Appliance
-  When I ask for all rows
+  When I ask for a single row
   And I only want appliances with more than <value> amps
-  Then I should only have <count> results
+  Then I should get <count> results
   And I should only get appliances with more than <value> amps
 
   Examples:
     | value | count |
-    | 6     | 4     |
-    | 7     | 3     |
-    | 10    | 3     |
-    | 15    | 2     |
+    | 6     | 1     |
+    | 7     | 1     |
+    | 10    | 1     |
+    | 15    | 1     |
     | 20    | 1     |
     | 30    | 0     |
 
-
-Scenario Outline: Executing a query with order by
-  Given I have a model for Appliance
-  When I ask for all rows
-  And I order rows by <orderby>
-  Then the records should be sorted by <orderby>
-
-  Examples:
-  | orderby   |
-  | id        |
-  | name      |
-  | AMPS      |
-
-Scenario Outline: Executing a query with descending order by
-  Given I have a model for Appliance
-  When I ask for all rows
-  And I order rows by <orderby> desc
-  Then the records should be reverse-sorted by <orderby>
-
-  Examples:
-  | orderby |
-  | id      |
-  | name    |
-  | AMPS    |
-
 Scenario: Selecting a subset of columns
   Given I have a model for Appliance
-  When I ask for all rows
+  When I ask for a single row
   And I ask for the columns "Id, Name"
   Then the records should only have the columns "Id, Name"
 
 Scenario: Selecting an invalid column
   Given I have a model for Appliance
-  When I ask for all rows
+  When I ask for a single row
   And I ask for an invalid column
   Then the query should throw an exception

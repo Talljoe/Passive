@@ -3,6 +3,7 @@
 namespace Passive
 {
     using System.Collections.Generic;
+    using Passive.Dialect;
 
     /// <summary>
     ///   Describes the interface that wraps your database in Dynamic Funtime
@@ -63,5 +64,10 @@ namespace Passive
         ///   Gets a table in the database.
         /// </summary>
         DynamicModel GetTable(string tableName, string primaryKeyField = "");
+
+        /// <summary>
+        /// Gets the capabilities for this database.
+        /// </summary>
+        DatabaseDialect Dialect { get; }
     }
 }

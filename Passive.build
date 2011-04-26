@@ -3,11 +3,15 @@
 <project name="Passive" default="all">
   <loadtasks assembly="tools/gitnub/Tall.Gitnub.Nant.dll" />
 
+  <property name="packages.source.local"
+            value="${environment::get-variable('LOCAL_PACKAGE_SOURCE')}"
+            if="${environment::variable-exists('LOCAL_PACKAGE_SOURCE')}"
+            overwrite="false" />
   <property name="project.path" value="${project::get-base-directory()}" />
   <property name="dist.path" value="${project.path}/dist"/>
   <property name="asminfo.filepath" value="${project.path}/Passive/AssemblyInfo.cs" />
   <property name="build.path" value="${project.path}/build"/>
-  <property name="tests.path" value="${build.path}/tests" />
+  <property name="tests.base.path" value="${build.path}/tests" />
   <property name="build.debug" value="PDBOnly" overwrite="false" />
   <property name="build.defines" value="" overwrite="false" />
   <property name="build.optimize" value="true" overwrite="false" />
@@ -16,21 +20,12 @@
   <property name="tools.github-upload.path" value="${project.path}/tools/github-upload"/>
   <property name="tools.xunit.path" value="${project.path}/tools/xunit"/>
   <property name="build.version"
-            value="${version.major}.${version.minor}.${version.build}.${version.revision}"
+            value="${version.major}.${version.minor}.${version.revision}.${version.build}"
             dynamic="true"/>
   <property name="build.assemblyversion" value="${version.major}.${version.minor}.0.0" dynamic="true"/>
 
   <property name="github.user" value="${git::readconfig('github.user')}" />
   <property name="github.token" value="${git::readconfig('github.token')}" />
-
-  <property name="packages.source.local"
-          value="${dist.path}"
-          unless="${environment::variable-exists('LOCAL_PACKAGE_SOURCE')}"
-          overwrite="false" />
-  <property name="packages.source.local"
-            value="${environment::get-variable('LOCAL_PACKAGE_SOURCE')}"
-            if="${environment::variable-exists('LOCAL_PACKAGE_SOURCE')}"
-            overwrite="false" />
 
   <target name="passive.async">
     <property name="output.path" value="${build.path}/Passive.Async" />
@@ -50,6 +45,9 @@
     <call target="passive-compile" />
   </target>
   
+  <property name="tests.configurations" value="sqlce;sqlexpress" overwrite="false" />
+  <property name="tests.config.name" value="sqlce" overwrite="false" />
+
   <target name="passive-compile" depends="init create-assembly-info">
     <csc noconfig="true"
          warnaserror="true"
@@ -76,13 +74,14 @@
     </csc>
   </target>
 
-  <target name="compile-tests" depends="passive">
+  <target name="compile-tests" depends="passive passive.async">
     <patternset id="test-dependencies">
-      <include name="${build.path}/Passive/Passive.dll" />
+      <include name="${build.path}/Passive.Async/Passive.dll" />
       <include name="${project.path}/packages/Rx-Interactive.*/lib/Net4/System.Interactive.dll"/>
       <include name="${project.path}/packages/Rx-AsyncLinq.*/lib/net4/System.Linq.Async.dll"/>
       <include name="${project.path}/packages/Rx-Core.*/lib/net4/System.CoreEx.dll"/>
       <include name="${project.path}/packages/xunit.*/lib/xunit.dll"/>
+      <include name="${project.path}/packages/xunit.extensions.*/lib/xunit.extensions.dll"/>
       <include name="${project.path}/packages/SqlServerCompact.*/lib/System.Data.SqlServerCe.dll"/>
       <include name="${project.path}/packages/SpecFlow.*/lib/net35/TechTalk.SpecFlow.dll"/>
       <include name="${project.path}/packages/FluentAssertions.*/lib/.NetFramework 4.0\FluentAssertions.dll"/>
@@ -112,7 +111,7 @@
         <patternset refid="test-dependencies" />
       </fileset>
     </copy>
-    <copy file="Passive.Test/app.config" tofile="${tests.path}/Passive.Test.dll.config" />
+    <copy file="Passive.Test/${tests.config.name}.config" tofile="${tests.path}/Passive.Test.dll.config" />
     <copy todir="${tests.path}/Data" flatten="true">
       <fileset>
         <include name="Passive.Test/Data/*" />
@@ -120,19 +119,29 @@
     </copy>
   </target>
 
-  <target name="test" depends="compile-tests">
+  <target name="test">
+    <foreach item="String" in="${tests.configurations}" delim=";" property="tests.config.name">
+      <property name="tests.path" value="${tests.base.path}/${tests.config.name}" />
+      <call target="test-core" />
+    </foreach>
+  </target>
+
+  <target name="test-core" depends="compile-tests">
     <exec program="${tools.xunit.path}/xunit.console.clr4.exe"
           workingdir="${tests.path}"
-          commandline="${tests.path}/Passive.Test.dll /html ${tests.path}/results.html"
+          commandline="${tests.path}/Passive.Test.dll /silent /html ${tests.path}/results.html"
           failonerror="true" />
-
   </target>
 
   <target name="all" depends="passive passive.async test" />
   <target name="dist" depends="rebuild build-nuget-package build-dist-zip" />
   <target name="rebuild" depends="clean build" />
   <target name="build" depends="init all" />
-  <target name="publish" depends="dist get-git-revision">
+  <target name="check-publish-branch">
+    <property name="branch.name" value="master" />
+    <fail message="Must be on branch '${branch.name}' to publish. Currently on '${git::getbranch()}.'" if="${git::getbranch() != branch.name}" />
+  </target>
+  <target name="publish" depends="check-publish-branch dist get-git-revision">
     <exec program="${tools.nuget.path}\nuget.exe" commandline="push ${dist.path}\Passive.${build.version}.nupkg" />
     <exec program="${tools.nuget.path}\nuget.exe" commandline="push ${dist.path}\Passive.Async.${build.version}.nupkg" />
     <github-addfile filename="${dist.path}\Passive.Async.${build.version}.nupkg"
@@ -209,11 +218,13 @@
     <property name="nuspec.path" value="Passive.Async.nuspec" />
     <call target="build-nuet-package-core" />
 
-    <copy todir="${packages.source.local}" unless="${packages.source.local == dist.path}" flatten="true">
-      <fileset>
-        <include name="${dist.path}/*.nupkg" />
-      </fileset>
-    </copy>
+    <if test="${property::exists('packages.source.local')}">
+      <copy todir="${packages.source.local}" unless="${packages.source.local == ''}" flatten="true">
+        <fileset>
+          <include name="${dist.path}/*.nupkg" />
+        </fileset>
+      </copy>
+    </if>
   </target>
 
   <target name="get-git-revision">
@@ -223,12 +234,29 @@
           failonerror="true"
           output="${temp.revision.file}" />
     <loadfile file="${temp.revision.file}" property="actual.git.revision" />
-    <regex pattern="(?'gitmajor'\d+)\.(?'gitminor'\d+)\.(?'gitbuild'\d+)\.(\d+)-(?'gitrevisionnumber'\d+)-.*"
+    <regex pattern="(?'gitmajor'\d+)\.(?'gitminor'\d+)\.(?'gitlastrevision'\d+)\.(\d+)-(?'gitrevisionnumber'\d+)-.*"
            input="${actual.git.revision}" />
+
+
+    <xmlpeek file="Passive.nuspec"
+     xpath="//package/nu:metadata/nu:version"
+     property="actual.nuspec.revision">
+      <namespaces>
+        <namespace prefix="xsi" uri="http://www.w3.org/2001/XMLSchema-instance" />
+        <namespace prefix="xsd" uri="http://www.w3.org/2001/XMLSchema" />
+        <namespace prefix="nu" uri="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd" />
+      </namespaces>
+    </xmlpeek>
+
+    <regex pattern="(?'nuspecmajor'\d+)\.(?'nuspecminor'\d+)\.(?'nuspecrevisionnumber'\d+)\.(?'nuspecbuild'\d+)"
+           input="${actual.nuspec.revision}" />
+
     <property name="version.major" value="${gitmajor}" overwrite="true" />
     <property name="version.minor" value="${gitminor}" overwrite="true" />
-    <property name="version.build" value="${gitbuild}" overwrite="true" />
-    <property name="version.revision" value="${gitrevisionnumber}" overwrite="true" />
+    <property name="version.revision" value="${int::parse(gitlastrevision) + int::parse(gitrevisionnumber)}" overwrite="true" />
+    <property name="sameversion" value="${nuspecmajor == version.major and nuspecminor == version.minor and nuspecrevisionnumber == version.revision}" />
+    <property name="version.build" value="0" overwrite="true" unless="${sameversion}" />
+    <property name="version.build" value="${int::parse(nuspecbuild) + 1}" overwrite="true" if="${sameversion}" />
     <delete file="${temp.revision.file}" failonerror="false" />
   </target>
 

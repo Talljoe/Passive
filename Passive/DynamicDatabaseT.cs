@@ -9,6 +9,7 @@ namespace Passive
     using System.Data.Common;
     using System.Dynamic;
     using System.Linq;
+    using Passive.Dialect;
 
     /// <summary>
     ///   A class that wraps your database in Dynamic Funtime
@@ -18,14 +19,16 @@ namespace Passive
         where TConnection : DbConnection
         where TCommand : DbCommand
     {
-        private readonly string _connectionString;
-        private readonly TFactory _factory;
+        private string _connectionString;
+        private TFactory _factory;
+        private Lazy<DatabaseDialect> _dialect;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
         /// </summary>
         /// <param name="connectionStringName">Name of the connection string.</param>
-        public DynamicDatabase(string connectionStringName = null)
+        /// <param name="databaseDetectors">Classes used to probe the database.</param>
+        public DynamicDatabase(string connectionStringName = "", IEnumerable<IDatabaseDetector> databaseDetectors = null)
         {
             if (String.IsNullOrEmpty(connectionStringName))
             {
@@ -44,8 +47,40 @@ namespace Passive
                 throw new InvalidOperationException("Can't find a connection string with the name '" +
                                                     connectionStringName + "'");
             }
-            this._factory = (TFactory)DbProviderFactories.GetFactory(_providerName);
-            this._connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
+
+            Initialize(ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString, _providerName, databaseDetectors);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
+        /// </summary>
+        /// <param name="connectionString">Database connection string</param>
+        /// <param name="providerName">Invariant name of the database provider</param>
+        /// <param name="databaseDetectors">Classes used to probe the database.</param>
+        public DynamicDatabase(string connectionString, string providerName, IEnumerable<IDatabaseDetector> databaseDetectors = null)
+        {
+            Initialize(connectionString, providerName, databaseDetectors);
+        }
+
+        private void Initialize(string connectionString, string providerName, IEnumerable<IDatabaseDetector> databaseDetectors = null)
+        {
+            databaseDetectors = (databaseDetectors ?? Enumerable.Empty<DatabaseDetector>()).DefaultIfEmpty(new DatabaseDetector());
+
+            this._factory = (TFactory)DbProviderFactories.GetFactory(providerName);
+            this._connectionString = connectionString;
+            this._dialect = new Lazy<DatabaseDialect>(
+                () => databaseDetectors.Select(dd => dd.Probe(this, providerName, connectionString))
+                                       .Where(dc => dc != null)
+                                       .FirstOrDefault()
+                                       ?? new DatabaseDialect());
+        }
+
+        /// <summary>
+        /// Gets the capabilities for this database.
+        /// </summary>
+        public DatabaseDialect Dialect
+        {
+            get { return this._dialect.Value; }
         }
 
         /// <summary>

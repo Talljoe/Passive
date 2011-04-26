@@ -1,7 +1,7 @@
-﻿Feature: DynamicModel All()
-  In order to access data
+﻿Feature: DynamicModel Paged()
+  In order to reduce the load on my database
   As a developer
-  I want to get all rows from the database
+  I want to get page results
 
 Background:
   Given a database with the following appliances
@@ -14,32 +14,31 @@ Background:
 
 Scenario: Getting all records
   Given I have a model for Appliance
-  When I ask for all rows
+  When I ask for page 1
+  And the page size is 20
   Then I should get all items
 
 Scenario Outline: Getting some records
   Given I have a model for Appliance
-  When I ask for all rows
-  And I limit the query to <n> rows
-  Then I should only have <n> results
-  And they should be a subset of all data
+  When I ask for page <page>
+  And the page size is <page size>
+  And I order rows by Id
+  Then they should have the ids <ids>
 
   Examples:
-    |n|
-    |1|
-    |2|
-    |3|
-    |4|
-
-Scenario: Asking for too many records
-  Given I have a model for Appliance
-  When I ask for all rows
-  And I limit the query to more rows than are in the database
-  Then I should get all items
+    | page | page size | count | ids     |
+    | 1    | 2         | 2     | 1,2     |
+    | 2    | 2         | 2     | 3,4     |
+    | 3    | 2         | 0     |         |
+    | 1    | 3         | 3     | 1,2,3   |
+    | 2    | 3         | 1     | 4       |
+    | 3    | 3         | 0     |         |
+    | 1    | 4         | 4     | 1,2,3,4 |
+    | 2    | 4         | 0     |         |
 
 Scenario Outline: Filtering records by an object
   Given I have a model for Appliance
-  When I ask for all rows
+  When I ask for page 1
   And I only want appliances colored <value>
   Then I should only have <count> results
   And I should only get <value>-colored appliances
@@ -53,16 +52,17 @@ Scenario Outline: Filtering records by an object
 
 Scenario Outline: Filtering records by string
   Given I have a model for Appliance
-  When I ask for all rows
+  When I ask for page 1
+  And the page size is 2
   And I only want appliances with more than <value> amps
   Then I should only have <count> results
   And I should only get appliances with more than <value> amps
 
   Examples:
     | value | count |
-    | 6     | 4     |
-    | 7     | 3     |
-    | 10    | 3     |
+    | 6     | 2     |
+    | 7     | 2     |
+    | 10    | 2     |
     | 15    | 2     |
     | 20    | 1     |
     | 30    | 0     |
@@ -70,7 +70,7 @@ Scenario Outline: Filtering records by string
 
 Scenario Outline: Executing a query with order by
   Given I have a model for Appliance
-  When I ask for all rows
+  When I ask for page 1
   And I order rows by <orderby>
   Then the records should be sorted by <orderby>
 
@@ -82,7 +82,7 @@ Scenario Outline: Executing a query with order by
 
 Scenario Outline: Executing a query with descending order by
   Given I have a model for Appliance
-  When I ask for all rows
+  When I ask for page 1
   And I order rows by <orderby> desc
   Then the records should be reverse-sorted by <orderby>
 
@@ -94,12 +94,12 @@ Scenario Outline: Executing a query with descending order by
 
 Scenario: Selecting a subset of columns
   Given I have a model for Appliance
-  When I ask for all rows
+  When I ask for page 1
   And I ask for the columns "Id, Name"
   Then the records should only have the columns "Id, Name"
 
 Scenario: Selecting an invalid column
   Given I have a model for Appliance
-  When I ask for all rows
+  When I ask for page 1
   And I ask for an invalid column
   Then the query should throw an exception

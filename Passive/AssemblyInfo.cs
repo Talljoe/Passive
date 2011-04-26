@@ -15,8 +15,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProductAttribute("Passive: A \'Dynamic\' Data-Access Framework")]
 [assembly: AssemblyCompanyAttribute("Tall Ambitions LLC")]
 [assembly: AssemblyCopyrightAttribute("Copyright © 2011 Joe Wasson, Rob Conery, and contributors")]
-[assembly: AssemblyVersionAttribute("0.1.0.0")]
-[assembly: AssemblyFileVersionAttribute("0.1.1.0")]
+[assembly: AssemblyVersionAttribute("0.2.0.0")]
+[assembly: AssemblyFileVersionAttribute("0.2.0.0")]
 [assembly: ComVisibleAttribute(false)]
 [assembly: CLSCompliantAttribute(true)]
 
