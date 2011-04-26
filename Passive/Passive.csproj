@@ -41,15 +41,15 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="ColumnIgnoreAttribute.cs" />
     <Compile Include="ColumnNameAttribute.cs" />
-    <Compile Include="DatabaseDialect.cs" />
+    <Compile Include="Dialect\DatabaseDialect.cs" />
     <Compile Include="DatabaseDetector.cs" />
     <Compile Include="DynamicCommand.cs" />
     <Compile Include="DynamicDatabase.cs" />
     <Compile Include="DynamicModel.cs" />
     <Compile Include="IDatabaseDetector.cs" />
     <Compile Include="ObjectExtensions.cs" />
-    <Compile Include="SqlCe4Dialect.cs" />
-    <Compile Include="SqlServerDialect.cs" />
+    <Compile Include="Dialect\SqlCompact4Dialect.cs" />
+    <Compile Include="Dialect\SqlServerDialect.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

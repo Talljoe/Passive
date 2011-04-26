@@ -2,6 +2,8 @@
 // See included LICENSE for details.
 namespace Passive
 {
+    using Passive.Dialect;
+
     /// <summary>
     /// Interface that describes a way of detecting the database
     /// </summary>

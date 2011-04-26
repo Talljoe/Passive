@@ -9,6 +9,7 @@ namespace Passive
     using System.Data.Common;
     using System.Dynamic;
     using System.Linq;
+    using Passive.Dialect;
 
     /// <summary>
     ///   A class that wraps your database in Dynamic Funtime

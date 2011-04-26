@@ -1,6 +1,6 @@
 ﻿// Copyright (c) 2011 Tall Ambitions, LLC
 // See included LICENSE for details.
-namespace Passive
+namespace Passive.Dialect
 {
     using System;
 

@@ -5,6 +5,7 @@ namespace Passive
     using System;
     using System.Data.SqlClient;
     using System.Linq;
+    using Passive.Dialect;
 
     /// <summary>
     /// Class that probes for databases in a default manner.
@@ -22,7 +23,7 @@ namespace Passive
                     return ProbeSqlServer(database);
 
                 case "System.Data.SqlServerCe.4.0":
-                    return new SqlCe4Dialect();
+                    return new SqlCompact4Dialect();
 
                 default:
                     return new DatabaseDialect();

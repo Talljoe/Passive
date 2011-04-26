@@ -1,13 +1,13 @@
 ﻿// Copyright (c) 2011 Tall Ambitions, LLC
 // See included LICENSE for details.
-namespace Passive
+namespace Passive.Dialect
 {
     using System;
 
     /// <summary>
     /// Class that describes the SQL CE 4.0 dialect.
     /// </summary>
-    public class SqlCe4Dialect : DatabaseDialect
+    public class SqlCompact4Dialect : DatabaseDialect
     {
         /// <summary>
         /// Gets the SQL statement for paging given the supplied information.
