@@ -1,7 +1,8 @@
-0.1.10.0
+0.2.0.0
 --------
 * Fixed error in SQL paging where it would fetch an extra row at the beginning.
 * Removed DatabaseCapabilities and replaced with new dialect classes.
+* Added overload to DynamicDatabase to take the connection string explicitly (thank you jgeurts).
 
 0.1.3.0
 -------
