@@ -285,6 +285,50 @@ this.ScenarioSetup(scenarioInfo);
             testRunner.CollectScenarioErrors();
         }
         
+        [Xunit.Extensions.TheoryAttribute()]
+        [Xunit.TraitAttribute("FeatureTitle", "DynamicModel Paged()")]
+        [Xunit.TraitAttribute("Description", "Page metadata should be correct")]
+        [Xunit.Extensions.InlineDataAttribute("1", "1", "6", "4", "4", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("1", "1", "7", "3", "3", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("1", "1", "10", "3", "3", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("1", "1", "15", "2", "2", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("1", "1", "20", "1", "1", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("1", "1", "30", "0", "0", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "2", "6", "4", "2", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "2", "7", "3", "2", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "2", "10", "3", "2", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "2", "15", "2", "1", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "2", "20", "1", "1", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "2", "30", "0", "0", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "3", "6", "4", "2", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "3", "7", "3", "1", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "3", "10", "3", "1", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "3", "15", "2", "1", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "3", "20", "1", "1", new string[0])]
+        [Xunit.Extensions.InlineDataAttribute("2", "3", "30", "0", "0", new string[0])]
+        public virtual void PageMetadataShouldBeCorrect(string page, string pageSize, string amps, string totalRecords, string totalPages, string[] exampleTags)
+        {
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Page metadata should be correct", exampleTags);
+#line 107
+this.ScenarioSetup(scenarioInfo);
+#line 108
+  testRunner.Given("I have a model for Appliance");
+#line 109
+  testRunner.When(string.Format("I ask for page {0}", page));
+#line 110
+  testRunner.And(string.Format("the page size is {0}", pageSize));
+#line 111
+  testRunner.And(string.Format("I only want appliances with more than {0} amps", amps));
+#line 112
+  testRunner.Then(string.Format("CurrentPage should be an integer with value {0}", page));
+#line 113
+  testRunner.And(string.Format("TotalRecords should be an integer with value {0}", totalRecords));
+#line 114
+  testRunner.And(string.Format("TotalPages should be an integer with value {0}", totalPages));
+#line hidden
+            testRunner.CollectScenarioErrors();
+        }
+        
         [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "1.6.1.0")]
         [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
         public class FixtureData : System.IDisposable

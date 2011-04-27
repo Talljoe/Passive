@@ -103,3 +103,33 @@ Scenario: Selecting an invalid column
   When I ask for page 1
   And I ask for an invalid column
   Then the query should throw an exception
+
+Scenario Outline: Page metadata should be correct
+  Given I have a model for Appliance
+  When I ask for page <page>
+  And the page size is <page size>
+  And I only want appliances with more than <amps> amps
+  Then CurrentPage should be an integer with value <page>
+  And TotalRecords should be an integer with value <total records>
+  And TotalPages should be an integer with value <total pages>
+
+    Examples:
+    | page | page size | amps | total records | total pages |
+    | 1    | 1         | 6    | 4             | 4           |
+    | 1    | 1         | 7    | 3             | 3           |
+    | 1    | 1         | 10   | 3             | 3           |
+    | 1    | 1         | 15   | 2             | 2           |
+    | 1    | 1         | 20   | 1             | 1           |
+    | 1    | 1         | 30   | 0             | 0           |
+    | 2    | 2         | 6    | 4             | 2           |
+    | 2    | 2         | 7    | 3             | 2           |
+    | 2    | 2         | 10   | 3             | 2           |
+    | 2    | 2         | 15   | 2             | 1           |
+    | 2    | 2         | 20   | 1             | 1           |
+    | 2    | 2         | 30   | 0             | 0           |
+    | 2    | 3         | 6    | 4             | 2           |
+    | 2    | 3         | 7    | 3             | 1           |
+    | 2    | 3         | 10   | 3             | 1           |
+    | 2    | 3         | 15   | 2             | 1           |
+    | 2    | 3         | 20   | 1             | 1           |
+    | 2    | 3         | 30   | 0             | 0           |

@@ -213,6 +213,14 @@ namespace Passive.Test.DynamicModelTests
             var expected = ids.Split(new[] {',', ' '}, StringSplitOptions.RemoveEmptyEntries).Select(Int32.Parse);
             ApplianceResult.Select(a => a.Id).Should().Equal(expected);
         }
+
+        [Then(@"(\w+) should be an integer with value (\d+)")]
+        public void ThenPropertyShouldBy(string property, int value)
+        {
+            var dict = ((object)Context.GetResult()).ToDictionary();
+            var actual = (int)dict[property];
+            actual.Should().Be(value);
+        }
         
         #endregion
 
