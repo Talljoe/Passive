@@ -4,8 +4,6 @@ namespace Passive.Test.DynamicModelTests
 {
     using System;
     using System.Collections.Generic;
-    using System.Dynamic;
-    using System.Linq;
 
     internal class DynamicModelContext
     {
@@ -46,25 +44,9 @@ namespace Passive.Test.DynamicModelTests
 
         public object Where { get; set; }
 
-        public void SetMethod(string methodName)
+        public void SetFunction(Func<dynamic> func)
         {
-            switch (methodName.ToLowerInvariant())
-            {
-                case "all":
-                    this.function = this.AllFunc;
-                    break;
-
-                case "single":
-                    this.function = this.SingleFunc;
-                    break;
-
-                case "paged":
-                    this.function = this.PagedFunc;
-                    break;
-
-                default:
-                    throw new ArgumentException("Not a valid method name", methodName);
-            }
+            this.function = func;
         }
 
         public dynamic GetResult()
@@ -72,38 +54,5 @@ namespace Passive.Test.DynamicModelTests
             return this.function();
         }
 
-        private dynamic AllFunc()
-        {
-            dynamic d = new ExpandoObject();
-            d.Items = this.Model.All(this.Where, this.OrderBy, this.Limit ?? 0, this.Columns, this.GetArgs());
-            return d;
-        }
-
-        private dynamic PagedFunc()
-        {
-            return this.Model.Paged(this.Where, this.OrderBy, this.Columns, this.PageSize ?? 20, this.CurrentPage ?? 1,
-                                    this.GetArgs());
-        }
-
-        private dynamic SingleFunc()
-        {
-            dynamic d = new ExpandoObject();
-            d.Items = GetSingle();
-            return d;
-        }
-
-        private IEnumerable<dynamic> GetSingle()
-        {
-            var result = this.Model.Single(this.Key, this.Where, this.Columns, this.GetArgs());
-            if (result != null)
-            {
-                yield return result;
-            }
-        }
-
-        private object[] GetArgs()
-        {
-            return this.Args.Any() ? this.Args.ToArray() : null;
-        }
     }
 }

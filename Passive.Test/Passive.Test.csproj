@@ -36,9 +36,18 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.CoreEx, Version=1.0.2856.104, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rx-Core.1.0.2856.0\lib\Net4\System.CoreEx.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\packages\SqlServerCompact.4.0.8482.1\lib\System.Data.SqlServerCe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Interactive, Version=1.0.2856.104, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rx-Interactive.1.0.2856.0\lib\Net4\System.Interactive.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Linq.Async, Version=1.0.2856.104, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rx-AsyncLinq.1.0.2856.0\lib\Net4\System.Linq.Async.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -58,6 +67,18 @@
   <ItemGroup>
     <None Include="app.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="DynamicModelTests\Async\All.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>All.feature.cs</LastGenOutput>
+    </None>
+    <None Include="DynamicModelTests\Async\Paged.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>Paged.feature.cs</LastGenOutput>
+    </None>
+    <None Include="DynamicModelTests\Async\Single.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>Single.feature.cs</LastGenOutput>
     </None>
     <None Include="sqlexpress.config" />
     <None Include="sqlce.config" />
@@ -84,6 +105,22 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DynamicModelTests\Async\All.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>All.feature</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicModelTests\Async\DynamicAsyncModelSteps.cs" />
+    <Compile Include="DynamicModelTests\Async\Paged.feature.cs">
+      <DependentUpon>Paged.feature</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="DynamicModelTests\Async\Single.feature.cs">
+      <DependentUpon>Single.feature</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="DynamicModelTests\DynamicModelSteps.cs" />
     <Compile Include="DynamicModelTests\All.feature.cs">
       <AutoGen>True</AutoGen>

@@ -3,6 +3,7 @@
 // See included LICENSE for details.
 namespace Passive.Async
 {
+    using System;
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
@@ -32,7 +33,7 @@ namespace Passive.Async
         /// Asynchronously runs a query against the database.
         /// </summary>
         /// <returns></returns>
-        public IAsyncEnumerable<object> QueryAsync(string sql, params object[] args)
+        public IAsyncEnumerable<dynamic> QueryAsync(string sql, params object[] args)
         {
             return this.QueryAsync(new DynamicCommand { Sql = sql, Arguments = args, });
         }
@@ -41,16 +42,16 @@ namespace Passive.Async
         /// Asynchronously runs a query against the database.
         /// </summary>
         /// <returns></returns>
-        public IAsyncEnumerable<object> QueryAsync(DynamicCommand command)
+        public IAsyncEnumerable<dynamic> QueryAsync(DynamicCommand command)
         {
-            return new AsyncQuery(this, command);
+            return new AsyncQuery(this, command).Select(o => (dynamic)o);
         }
 
         /// <summary>
         /// Asynchronously runs a query against the database.
         /// </summary>
         /// <returns></returns>
-        public Task<IEnumerable<object>> FetchAsync(string sql, params object[] args)
+        public Task<IEnumerable<dynamic>> FetchAsync(string sql, params object[] args)
         {
             return this.FetchAsync(new DynamicCommand { Sql = sql, Arguments = args, });
         }
@@ -59,17 +60,17 @@ namespace Passive.Async
         /// Asynchronously runs a query against the database.
         /// </summary>
         /// <returns></returns>
-        public Task<IEnumerable<object>> FetchAsync(DynamicCommand command)
+        public Task<IEnumerable<dynamic>> FetchAsync(DynamicCommand command)
         {
             return this.QueryAsync(command)
                        .ToList()
-                       .Select(l => l.AsEnumerable());
+                       .Select(list => list.AsEnumerable());
         }
 
         /// <summary>
         /// Asynchronously returns a single result;
         /// </summary>
-        public Task<object> ScalarAsync(DynamicCommand command)
+        public Task<dynamic> ScalarAsync(DynamicCommand command)
         {
             return TaskHelpers.Using(this.OpenConnection(),
                                      connection =>
@@ -82,7 +83,7 @@ namespace Passive.Async
         /// <summary>
         /// Asynchronously returns a single result;
         /// </summary>
-        public Task<object> ScalarAsync(string sql, params object[] args)
+        public Task<dynamic> ScalarAsync(string sql, params object[] args)
         {
             return this.ScalarAsync(new DynamicCommand {Sql = sql, Arguments = args});
         }
@@ -154,7 +155,7 @@ namespace Passive.Async
         /// <summary>
         /// Gets the task for executing a scalar query.
         /// </summary>
-        protected abstract Task<object> GetExecuteScalarTask(TCommand command);
+        protected abstract Task<dynamic> GetExecuteScalarTask(TCommand command);
 
         /// <summary>
         /// Gets the task for executing a non-query.
@@ -184,6 +185,7 @@ namespace Passive.Async
                 private readonly DynamicAsyncDatabase<TFactory, TConnection, TCommand> database;
                 private readonly DynamicCommand command;
                 private DbDataReader reader;
+                private object current;
 
                 public QueryEnumerator(DynamicAsyncDatabase<TFactory, TConnection, TCommand> database, DynamicCommand command)
                 {
@@ -215,10 +217,29 @@ namespace Passive.Async
                         task = Task<bool>.Factory.StartNew(reader.Read);
                     }
 
-                    return task.Do(() => { this.Current = database.GetRow(this.reader); });
+                    return task.Do(
+                        b =>
+                            {
+                                this.HasCurrent = b;
+                                if (this.HasCurrent)
+                                {
+                                    this.Current = database.GetRow(this.reader);
+                                }
+                            });
                 }
 
-                public object Current { get; private set; }
+                private bool HasCurrent { get; set; }
+
+                public object Current
+                {
+                    get
+                    {
+                        if(!this.HasCurrent)
+                            throw new InvalidOperationException("No current item.");
+                        return this.current;
+                    }
+                    private set { this.current = value; }
+                }
 
                 private Task<DbDataReader> GetReader()
                 {

@@ -15,23 +15,23 @@ namespace Passive.Async
         ///   Asynchronously runs a query against the database.
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<object>> FetchAsync(string sql, params object[] args);
+        Task<IEnumerable<dynamic>> FetchAsync(string sql, params object[] args);
 
         /// <summary>
         ///   Asynchronously runs a query against the database.
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<object>> FetchAsync(DynamicCommand command);
+        Task<IEnumerable<dynamic>> FetchAsync(DynamicCommand command);
 
         /// <summary>
         ///   Asynchronously returns a single result;
         /// </summary>
-        Task<object> ScalarAsync(DynamicCommand command);
+        Task<dynamic> ScalarAsync(DynamicCommand command);
 
         /// <summary>
         ///   Asynchronously returns a single result;
         /// </summary>
-        Task<object> ScalarAsync(string sql, params object[] args);
+        Task<dynamic> ScalarAsync(string sql, params object[] args);
 
         /// <summary>
         ///   Executes a series of commands in a transaction
@@ -57,13 +57,13 @@ namespace Passive.Async
         /// Asynchronously runs a query against the database.
         /// </summary>
         /// <returns></returns>
-        IAsyncEnumerable<object> QueryAsync(string sql, params object[] args);
+        IAsyncEnumerable<dynamic> QueryAsync(string sql, params object[] args);
 
         /// <summary>
         /// Asynchronously runs a query against the database.
         /// </summary>
         /// <returns></returns>
-        IAsyncEnumerable<object> QueryAsync(DynamicCommand command);
+        IAsyncEnumerable<dynamic> QueryAsync(DynamicCommand command);
     }
 }
 #endif

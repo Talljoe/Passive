@@ -5,6 +5,7 @@ namespace Passive.Test.DynamicModelTests
     using System;
     using System.Collections.Generic;
     using System.Data.Common;
+    using System.Dynamic;
     using System.Linq;
     using System.Linq.Expressions;
     using Passive.Test.Models;
@@ -33,19 +34,19 @@ namespace Passive.Test.DynamicModelTests
         [When(@"I ask for all rows")]
         public void WhenIAskForAllRows()
         {
-            this.Context.SetMethod("All");
+            SetMethod("All");
         }
 
         [When(@"I ask for a single row")]
         public void WhenIAskForASingleRow()
         {
-            this.Context.SetMethod("Single");
+            SetMethod("Single");
         }
 
         [When(@"I ask for page (\d+)")]
         public void WhenIAskForPage(int page)
         {
-            this.Context.SetMethod("Paged");
+            SetMethod("Paged");
             this.Context.CurrentPage = page;
         }
         #endregion
@@ -114,7 +115,7 @@ namespace Passive.Test.DynamicModelTests
         [When(@"I ask for the record with the id of (\d+)")]
         public void WhenIAskForTheRecordWithTheIdOf(int id)
         {
-            Context.SetMethod("single");
+            this.SetMethod("single");
             Context.Key = id;
         }
 
@@ -246,6 +247,57 @@ namespace Passive.Test.DynamicModelTests
         private static Appliance CreateApplianceFromDynamic(dynamic d)
         {
             return new Appliance { Id = d.Id, Name = d.Name, Color = d.Color, Amps = d.Amps };
+        }
+
+        public void SetMethod(string methodName)
+        {
+            switch (methodName.ToLowerInvariant())
+            {
+                case "all":
+                    Context.SetFunction(this.AllFunc);
+                    break;
+
+                case "single":
+                    Context.SetFunction(this.SingleFunc);
+                    break;
+
+                case "paged":
+                    Context.SetFunction(this.PagedFunc);
+                    break;
+
+                default:
+                    throw new ArgumentException("Not a valid method name", methodName);
+            }
+        }
+
+        private dynamic AllFunc()
+        {
+            dynamic d = new ExpandoObject();
+            d.Items = Context.Model.All(Context.Where, Context.OrderBy, Context.Limit ?? 0, Context.Columns, this.GetArgs());
+            return d;
+        }
+
+        private dynamic PagedFunc()
+        {
+            return Context.Model.Paged(Context.Where, Context.OrderBy, Context.Columns, Context.PageSize ?? 20, Context.CurrentPage ?? 1,
+                                    this.GetArgs());
+        }
+
+        private dynamic SingleFunc()
+        {
+            dynamic d = new ExpandoObject();
+            d.Items = this.DoSingle().Where(x => x != null);
+            return d;
+        }
+
+        private IEnumerable<dynamic> DoSingle()
+        {
+            yield return Context.Model.Single(Context.Key, Context.Where, Context.Columns, this.GetArgs());
+        }
+
+        private object[] GetArgs()
+        {
+            return Context.Args.Any() ? Context.Args.ToArray() : null;
         }
     }
 }

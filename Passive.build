@@ -44,7 +44,7 @@
     <patternset id="additional-resources" />
     <call target="passive-compile" />
   </target>
-  
+
   <property name="tests.configurations" value="sqlce;sqlexpress" overwrite="false" />
   <property name="tests.config.name" value="sqlce" overwrite="false" />
 
@@ -94,6 +94,7 @@
          output="${tests.path}/Passive.Test.dll">
       <sources>
         <include name="Passive.Test/**/*.cs" />
+        <exclude name="Passive.Test/**/Async/*.cs" unless="${tests.async}" />
       </sources>
       <references>
         <include name="mscorlib.dll"/>
@@ -119,9 +120,20 @@
     </copy>
   </target>
 
+  <target name="configure-test-sqlexpress">
+    <property name="build.defines" value="" />
+    <property name="tests.async" value="true" />
+  </target>
+
+  <target name="configure-test-sqlce">
+    <property name="build.defines" value="NO_ASYNC" />
+    <property name="tests.async" value="false" />
+  </target>
+
   <target name="test">
     <foreach item="String" in="${tests.configurations}" delim=";" property="tests.config.name">
       <property name="tests.path" value="${tests.base.path}/${tests.config.name}" />
+      <call target="configure-test-${tests.config.name}" />
       <call target="test-core" />
     </foreach>
   </target>

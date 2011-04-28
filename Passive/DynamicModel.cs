@@ -287,13 +287,13 @@ namespace Passive
         /// </summary>
         public virtual dynamic Single(object key = null, object where = null, object columns = null, params object[] args)
         {
-            return this.DoSingle(key, where, columns, command => this.Database.Query(command).FirstOrDefault(), args);
+            return this.DoSingle(key, where, columns, args, command => this.Database.Query(command).FirstOrDefault());
         }
 
         /// <summary>
         ///   Does the work for fetching a single item.
         /// </summary>
-        protected virtual T DoSingle<T>(object key, object where, object columns, Func<DynamicCommand, T> work, object[] args)
+        protected virtual T DoSingle<T>(object key, object where, object columns, object[] args, Func<DynamicCommand, T> work)
         {
              var sql = string.Format("SELECT {0} FROM {1}", GetColumns(columns), this.TableName);
              var whereInfo = this.GetWhereInfo(where, key, args);

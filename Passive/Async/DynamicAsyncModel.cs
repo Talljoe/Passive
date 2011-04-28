@@ -4,8 +4,8 @@
 namespace Passive.Async
 {
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
+    using System.Linq;
 
     /// <summary>
     ///   A class that wraps your database table in Dynamic, asynchronous Funtime
@@ -18,7 +18,7 @@ namespace Passive.Async
         /// <param name="connectionStringName">Name of the connection string.</param>
         /// <param name="tableName">Name of the table.</param>
         /// <param name="primaryKeyField">The primary key field.</param>
-        public DynamicAsyncModel(string connectionStringName, string tableName, string primaryKeyField)
+        public DynamicAsyncModel(string connectionStringName, string tableName = null, string primaryKeyField = null)
             : this(new SqlDynamicAsyncDatabase(connectionStringName), tableName, primaryKeyField) {}
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Passive.Async
         /// <param name="database">The database.</param>
         /// <param name="tableName">Name of the table.</param>
         /// <param name="primaryKeyField">The primary key field.</param>
-        public DynamicAsyncModel(IDynamicAsyncDatabase database, string tableName, string primaryKeyField)
+        public DynamicAsyncModel(IDynamicAsyncDatabase database, string tableName = null, string primaryKeyField = null)
             : base(database, tableName, primaryKeyField) {}
 
         /// <summary>
@@ -69,9 +69,8 @@ namespace Passive.Async
         /// </summary>
         public virtual Task<dynamic> SingleAsync(object key = null, object where = null, object columns = null, params object[] args)
         {
-            return this.DoSingle(key, where, columns,
-                command => this.Database.FetchAsync(command).Select(result => result.FirstOrDefault()),
-                args);
+            return this.DoSingle(key, where, columns, args, command => this.Database.QueryAsync(command))
+                .FirstOrDefault();
         }
     }
 }

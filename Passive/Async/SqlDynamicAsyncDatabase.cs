@@ -34,11 +34,12 @@ namespace Passive.Async
         /// <summary>
         /// Gets the task for executing a scalar query.
         /// </summary>
-        protected override Task<object> GetExecuteScalarTask(SqlCommand command)
+        protected override Task<dynamic> GetExecuteScalarTask(SqlCommand command)
         {
-            return Task<DbDataReader>.Factory.FromAsync(
-                command.BeginExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult),
-                command.EndExecuteReader).ContinueWith(t => t.Result.Read() ? t.Result[0] : null);
+            return Task<DbDataReader>.Factory
+                .FromAsync(command.BeginExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult),
+                           command.EndExecuteReader)
+                .Select(r => r.Read() ? r[0] : null);
         }
 
         /// <summary>
