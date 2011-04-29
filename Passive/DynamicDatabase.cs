@@ -23,6 +23,14 @@ namespace Passive
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
         /// </summary>
+        /// <param name="dialect">The dialect.</param>
+        /// <param name="connectionStringName">Name of the connection string.</param>
+        public DynamicDatabase(DatabaseDialect dialect, string connectionStringName = "")
+            : this(connectionStringName, new[] {new ConstantDialectDetector(dialect)}) {}
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
+        /// </summary>
         /// <param name="connectionStringName">Name of the connection string.</param>
         /// <param name="databaseDetectors">Classes used to probe the database.</param>
         public DynamicDatabase(string connectionStringName = "", IEnumerable<IDatabaseDetector> databaseDetectors = null)
@@ -47,6 +55,15 @@ namespace Passive
 
             Initialize(ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString, _providerName, databaseDetectors);
         }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
+        /// </summary>
+        /// <param name="dialect">The dialect.</param>
+        /// <param name="connectionString">Database connection string</param>
+        /// <param name="providerName">Invariant name of the database provider</param>
+        public DynamicDatabase(DatabaseDialect dialect, string connectionString, string providerName)
+            : this(connectionString, providerName, new[] {new ConstantDialectDetector(dialect)}) {}
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
@@ -215,6 +232,25 @@ namespace Passive
             conn.ConnectionString = this._connectionString;
             conn.Open();
             return conn;
+        }
+
+        private class ConstantDialectDetector : IDatabaseDetector
+        {
+            private readonly DatabaseDialect dialect;
+
+            public ConstantDialectDetector(DatabaseDialect dialect)
+            {
+                if (this.dialect == null)
+                {
+                    throw new ArgumentNullException("dialect");
+                }
+                this.dialect = dialect;
+            }
+
+            public DatabaseDialect Probe(DynamicDatabase database, string providerName, string connectionString)
+            {
+                return this.dialect;
+            }
         }
     }
 }
