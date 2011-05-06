@@ -9,6 +9,7 @@ namespace Passive
     using System.Data.Common;
     using System.Dynamic;
     using System.Linq;
+    using Passive.Diagnostics;
     using Passive.Dialect;
 
     /// <summary>
@@ -97,17 +98,6 @@ namespace Passive
             get { return this._dialect.Value; }
         }
 
-        private DbCommand CreateDbCommand(DynamicCommand command, DbTransaction tx = null,
-                                          DbConnection connection = null)
-        {
-            var result = this._factory.CreateCommand();
-            result.Connection = connection;
-            result.CommandText = command.Sql;
-            result.Transaction = tx;
-            result.AddParams(command.Arguments);
-            return result;
-        }
-
         /// <summary>
         ///   Enumerates the reader yielding the result
         /// </summary>
@@ -121,11 +111,14 @@ namespace Passive
         /// </summary>
         public IEnumerable<object> Query(DynamicCommand command)
         {
+            var queryTraceEventArgs = new QueryTraceEventArgs(command.Sql);
+            QueryTrace.InvokeQueryBegin(queryTraceEventArgs);
             using (var conn = this.OpenConnection())
             {
                 var dbCommand = this.CreateDbCommand(command, connection: conn);
                 using (var rdr = dbCommand.ExecuteReader(CommandBehavior.CloseConnection))
                 {
+                    QueryTrace.InvokeQueryEnd(queryTraceEventArgs);
                     while (rdr.Read())
                     {
                         var d = (IDictionary<string, object>) new ExpandoObject();
@@ -168,8 +161,15 @@ namespace Passive
         /// </summary>
         public object Scalar(DynamicCommand command)
         {
+            var queryTraceEventArgs = new QueryTraceEventArgs(command.Sql);
+            QueryTrace.InvokeQueryBegin(queryTraceEventArgs);
+
             using (var conn = this.OpenConnection())
-                return this.CreateDbCommand(command, connection: conn).ExecuteScalar();
+            {
+                var scalar = this.CreateDbCommand(command, connection: conn).ExecuteScalar();
+                QueryTrace.InvokeQueryEnd(queryTraceEventArgs);
+                return scalar;
+            }
         }
 
         /// <summary>
@@ -205,8 +205,14 @@ namespace Passive
             using (var tx = (transaction) ? connection.BeginTransaction() : null)
             {
                 var result = commands
-                    .Select(cmd => this.CreateDbCommand(cmd, tx, connection))
-                    .Aggregate(0, (a, cmd) => a + cmd.ExecuteNonQuery());
+                    .Select(cmd => new { Args = new QueryTraceEventArgs(cmd.Sql), Command = this.CreateDbCommand(cmd, tx, connection) })
+                    .Aggregate(0, (a, x) =>
+                    {
+                        QueryTrace.InvokeQueryBegin(x.Args);
+                        var r = a + x.Command.ExecuteNonQuery();
+                        QueryTrace.InvokeQueryEnd(x.Args);
+                        return r;
+                    });
                 if (tx != null)
                 {
                     tx.Commit();
@@ -232,6 +238,17 @@ namespace Passive
             conn.ConnectionString = this._connectionString;
             conn.Open();
             return conn;
+        }
+
+        private DbCommand CreateDbCommand(DynamicCommand command, DbTransaction tx = null,
+                                          DbConnection connection = null)
+        {
+            var result = this._factory.CreateCommand();
+            result.Connection = connection;
+            result.CommandText = command.Sql;
+            result.Transaction = tx;
+            result.AddParams(command.Arguments);
+            return result;
         }
 
         private class ConstantDialectDetector : IDatabaseDetector

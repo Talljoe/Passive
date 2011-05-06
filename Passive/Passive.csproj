@@ -41,6 +41,8 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="ColumnIgnoreAttribute.cs" />
     <Compile Include="ColumnNameAttribute.cs" />
+    <Compile Include="Diagnostics\QueryTrace.cs" />
+    <Compile Include="Diagnostics\QueryTraceEventArgs.cs" />
     <Compile Include="Dialect\DatabaseDialect.cs" />
     <Compile Include="DatabaseDetector.cs" />
     <Compile Include="DynamicCommand.cs" />

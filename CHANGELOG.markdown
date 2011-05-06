@@ -1,3 +1,7 @@
+vNext
+-----
+* Added support for tracing of SQL commands.
+
 0.2.0.0
 --------
 * Fixed error in SQL paging where it would fetch an extra row at the beginning.

@@ -59,6 +59,10 @@
     <None Include="app.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="DiagnosticsTests\QueryTrace.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>QueryTrace.feature.cs</LastGenOutput>
+    </None>
     <None Include="sqlexpress.config" />
     <None Include="sqlce.config" />
     <None Include="DynamicModelTests\All.feature">
@@ -84,6 +88,12 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DiagnosticsTests\QueryTrace.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>QueryTrace.feature</DependentUpon>
+    </Compile>
+    <Compile Include="DiagnosticsTests\TracingSteps.cs" />
     <Compile Include="DynamicModelTests\DynamicModelSteps.cs" />
     <Compile Include="DynamicModelTests\All.feature.cs">
       <AutoGen>True</AutoGen>
@@ -103,6 +113,7 @@
       <DependentUpon>Single.feature</DependentUpon>
     </Compile>
     <Compile Include="Models\Appliance.cs" />
+    <Compile Include="Utility\EventHelper.cs" />
     <Compile Include="Utility\ShouldExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
