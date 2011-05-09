@@ -1,6 +1,7 @@
-vNext
------
+0.2.8.0
+-------
 * Added support for tracing of SQL commands.
+* Built [Glimpse plugin][Passive.Glimpse] for viewing tracing data
 
 0.2.0.0
 --------
@@ -26,3 +27,5 @@ vNext
 0.1.0.0
 -------
 * Initial release.
+
+[Passive.Glimpse]: https://github.com/Talljoe/Passive.Glimpse "Passive.Glimpse project"
