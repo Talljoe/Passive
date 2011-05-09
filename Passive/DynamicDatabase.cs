@@ -24,6 +24,17 @@ namespace Passive
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
         /// </summary>
+        public DynamicDatabase() : this(null) {}
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
+        /// </summary>
+        /// <param name="connectionStringName">Name of the connection string.</param>
+        public DynamicDatabase(string connectionStringName) : this(connectionStringName, (IEnumerable<IDatabaseDetector>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
+        /// </summary>
         /// <param name="dialect">The dialect.</param>
         /// <param name="connectionStringName">Name of the connection string.</param>
         public DynamicDatabase(DatabaseDialect dialect, string connectionStringName = "")
@@ -34,9 +45,9 @@ namespace Passive
         /// </summary>
         /// <param name="connectionStringName">Name of the connection string.</param>
         /// <param name="databaseDetectors">Classes used to probe the database.</param>
-        public DynamicDatabase(string connectionStringName = "", IEnumerable<IDatabaseDetector> databaseDetectors = null)
+        public DynamicDatabase(string connectionStringName, IEnumerable<IDatabaseDetector> databaseDetectors)
         {
-            if (connectionStringName == "")
+            if (String.IsNullOrWhiteSpace(connectionStringName))
             {
                 connectionStringName = ConfigurationManager.ConnectionStrings[0].Name;
             }
@@ -71,8 +82,15 @@ namespace Passive
         /// </summary>
         /// <param name="connectionString">Database connection string</param>
         /// <param name="providerName">Invariant name of the database provider</param>
+        public DynamicDatabase(string connectionString, string providerName) : this(connectionString, providerName, null) {}
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DynamicDatabase"/> class.
+        /// </summary>
+        /// <param name="connectionString">Database connection string</param>
+        /// <param name="providerName">Invariant name of the database provider</param>
         /// <param name="databaseDetectors">Classes used to probe the database.</param>
-        public DynamicDatabase(string connectionString, string providerName, IEnumerable<IDatabaseDetector> databaseDetectors = null)
+        public DynamicDatabase(string connectionString, string providerName, IEnumerable<IDatabaseDetector> databaseDetectors)
         {
             Initialize(connectionString, providerName, databaseDetectors);
         }
@@ -257,11 +275,7 @@ namespace Passive
 
             public ConstantDialectDetector(DatabaseDialect dialect)
             {
-                if (this.dialect == null)
-                {
-                    throw new ArgumentNullException("dialect");
-                }
-                this.dialect = dialect;
+                this.dialect = dialect ?? new DatabaseDialect();
             }
 
             public DatabaseDialect Probe(DynamicDatabase database, string providerName, string connectionString)

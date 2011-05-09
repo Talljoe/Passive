@@ -4,9 +4,17 @@ namespace Passive.Dialect
 {
     using System;
 
-    internal class SqlServerDialect : DatabaseDialect
+    /// <summary>
+    /// Class that describes the dialect for Sql Server.
+    /// </summary>
+    public class SqlServerDialect : DatabaseDialect
     {
         private readonly string format;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SqlServerDialect"/> class.
+        /// </summary>
+        public SqlServerDialect() : this(0) {}
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SqlServerDialect"/> class.
