@@ -111,7 +111,7 @@ namespace Passive
         /// </summary>
         public IEnumerable<object> Query(DynamicCommand command)
         {
-            var queryTraceEventArgs = new QueryTraceEventArgs(command.Sql);
+            var queryTraceEventArgs = new QueryTraceEventArgs(command.Sql, command.Arguments, command.Context);
             QueryTrace.InvokeQueryBegin(queryTraceEventArgs);
             using (var conn = this.OpenConnection())
             {
@@ -161,7 +161,7 @@ namespace Passive
         /// </summary>
         public object Scalar(DynamicCommand command)
         {
-            var queryTraceEventArgs = new QueryTraceEventArgs(command.Sql);
+            var queryTraceEventArgs = new QueryTraceEventArgs(command.Sql, command.Arguments, command.Context);
             QueryTrace.InvokeQueryBegin(queryTraceEventArgs);
 
             using (var conn = this.OpenConnection())
@@ -205,7 +205,7 @@ namespace Passive
             using (var tx = (transaction) ? connection.BeginTransaction() : null)
             {
                 var result = commands
-                    .Select(cmd => new { Args = new QueryTraceEventArgs(cmd.Sql), Command = this.CreateDbCommand(cmd, tx, connection) })
+                    .Select(cmd => new { Args = new QueryTraceEventArgs(cmd.Sql, cmd.Arguments, cmd.Context), Command = this.CreateDbCommand(cmd, tx, connection) })
                     .Aggregate(0, (a, x) =>
                     {
                         QueryTrace.InvokeQueryBegin(x.Args);

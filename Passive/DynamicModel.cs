@@ -135,6 +135,7 @@ namespace Passive
                            {
                                Sql = string.Format(stub, this.TableName, keys, vals, this.Database.Dialect.GetIdentitySql()),
                                Arguments = items.Select(item => item.Value),
+                               Context = this.GetContext("Update"),
                            };
             }
             throw new InvalidOperationException("Can't parse this object to the database - there are no properties set");
@@ -157,6 +158,7 @@ namespace Passive
                            {
                                Sql = string.Format(stub, this.TableName, keys, this.PrimaryKeyField, items.Count),
                                Arguments = items.Select(item => item.Value).Concat(new[] {key}),
+                               Context = this.GetContext("Update"),
                            };
             }
             throw new InvalidOperationException("No parsable object was sent in - could not divine any name/value pairs");
@@ -231,7 +233,12 @@ namespace Passive
         /// </summary>
         protected virtual DynamicCommand CreateDeleteCommand(object key = null, object where = null, params object[] args)
         {
-            var command = new DynamicCommand {Sql = string.Format("DELETE FROM {0}", this.TableName), Arguments = args};
+            var command = new DynamicCommand
+                              {
+                                  Sql = string.Format("DELETE FROM {0}", this.TableName),
+                                  Arguments = args,
+                                  Context = this.GetContext("Delete")
+                              };
             return command;
         }
 
@@ -270,7 +277,7 @@ namespace Passive
             var sql = String.Format(limit > 0 ? "SELECT TOP " + limit + " {0} FROM {1}" : "SELECT {0} FROM {1}",
                                     GetColumns(columns), this.TableName);
             var whereInfo = this.GetWhereInfo(where, null, args);
-            var command1 = new DynamicCommand {Sql = sql + whereInfo.Sql, Arguments = whereInfo.Args};
+            var command1 = new DynamicCommand {Sql = sql + whereInfo.Sql, Arguments = whereInfo.Args, Context = GetContext("All")};
             var command = command1;
             if (!String.IsNullOrWhiteSpace(orderBy))
             {
@@ -294,9 +301,9 @@ namespace Passive
                 orderBy = this.PrimaryKeyField;
             }
             var sql = this.Database.Dialect.GetPagingSql(this.TableName, GetColumns(columns), orderBy, whereInfo.Sql, pageSize, currentPage);
-            var command = new DynamicCommand {Sql = sql, Arguments = whereInfo.Args};
+            var command = new DynamicCommand {Sql = sql, Arguments = whereInfo.Args, Context = this.GetContext("Paged(Results)")};
             var queryCommand = command;
-            var command1 = new DynamicCommand {Sql = countSql, Arguments = whereInfo.Args};
+            var command1 = new DynamicCommand {Sql = countSql, Arguments = whereInfo.Args, Context = this.GetContext("Paged(Count)")};
             var whereCommand = command1;
             var totalRecords = (int) this.Database.Scalar(whereCommand);
             return new
@@ -315,8 +322,13 @@ namespace Passive
         {
             var sql = string.Format("SELECT {0} FROM {1}", GetColumns(columns), this.TableName);
             var whereInfo = this.GetWhereInfo(where, key, args);
-            var command = new DynamicCommand {Sql = sql + whereInfo.Sql, Arguments = whereInfo.Args};
+            var command = new DynamicCommand {Sql = sql + whereInfo.Sql, Arguments = whereInfo.Args, Context = this.GetContext("Single")};
             return this.Database.Fetch(command).FirstOrDefault();
+        }
+
+        private string GetContext(string method)
+        {
+            return String.Format("DynamicModel[{0}]: {1}", this.TableName, method);
         }
 
         private WhereInfo GetWhereInfo(object where, object key, IEnumerable<object> args)

@@ -18,6 +18,14 @@ namespace Passive
         public string Sql { get; set; }
 
         /// <summary>
+        /// Gets or sets the context for the call. This is a user-readable string used for logging.
+        /// </summary>
+        /// <value>
+        /// The context.
+        /// </value>
+        public string Context { get; set; }
+
+        /// <summary>
         /// Gets or sets the arguments.
         /// </summary>
         /// <value>
