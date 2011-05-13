@@ -149,8 +149,7 @@ namespace Passive
             const string stub = "UPDATE {0} SET {1} WHERE {2} = @{3}";
             var items =
                 FilterItems(o, whitelist).Where(
-                    item => !item.Key.Equals(this.MapPrimaryKey(o), StringComparison.CurrentCultureIgnoreCase)
-                         && item.Value != null).ToList();
+                    item => !item.Key.Equals(this.MapPrimaryKey(o), StringComparison.CurrentCultureIgnoreCase)).ToList();
             if (items.Any())
             {
                 var keys = string.Join(",", items.Select((item, i) => string.Format("{0} = @{1} \r\n", item.Key, i)));

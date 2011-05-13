@@ -1,6 +1,7 @@
 vNext
 -----
-* DBNull values are now returned as nulls.
+* DBNull values are now returned as `null` values.
+* Allow columns to be updated to `null`.
 
 0.2.8.0
 -------
