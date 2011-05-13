@@ -1,3 +1,7 @@
+vNext
+-----
+* DBNull values are now returned as nulls.
+
 0.2.8.0
 -------
 * Added support for tracing of SQL commands.

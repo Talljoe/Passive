@@ -142,7 +142,8 @@ namespace Passive
                         var d = (IDictionary<string, object>) new ExpandoObject();
                         for (var i = 0; i < rdr.FieldCount; i++)
                         {
-                            d.Add(rdr.GetName(i), rdr[i]);
+                            var value = rdr[i];
+                            d.Add(rdr.GetName(i), DBNull.Value.Equals(value) ? null : value);
                         }
                         yield return d;
                     }
