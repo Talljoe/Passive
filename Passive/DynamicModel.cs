@@ -232,12 +232,14 @@ namespace Passive
         /// </summary>
         protected virtual DynamicCommand CreateDeleteCommand(object key = null, object where = null, params object[] args)
         {
-            var command = new DynamicCommand
-                              {
-                                  Sql = string.Format("DELETE FROM {0}", this.TableName),
-                                  Arguments = args,
-                                  Context = this.GetContext("Delete")
-                              };
+            var sql = String.Format("DELETE FROM {0}", this.TableName);
+            var whereInfo = this.GetWhereInfo(where, null, args);
+            var command = new DynamicCommand 
+            { 
+                Sql = sql + whereInfo.Sql, 
+                Arguments = whereInfo.Args, 
+                Context = GetContext("All") 
+            };            
             return command;
         }
 
