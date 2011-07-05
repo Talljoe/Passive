@@ -1,7 +1,8 @@
-vNext
+0.3.0.0
 -----
 * DBNull values are now returned as `null` values.
 * Allow columns to be updated to `null`.
+* Add missing WHERE clause to Delete (thank you jcoffman)
 
 0.2.8.0
 -------
