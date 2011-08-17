@@ -5,12 +5,12 @@
 
 Background:
   Given a database with the following appliances
-     | Id | Name      | Color           | Amps |
-     | 1  | Toaster   | Stainless Steel | 7    |
-     | 2  | Vacuum    | Red             | 12   |
-     | 3  | Stove     | White           | 30   |
-     | 4  | Microwave | White           | 20   |
-     #-----------------------------------------#
+     | Id | Name      | Color           | Amps | In Stock |
+     | 1  | Toaster   | Stainless Steel | 7    | false    |
+     | 2  | Vacuum    | Red             | 12   | true     |
+     | 3  | Stove     | White           | 30   | true     |
+     | 4  | Microwave | White           | 20   | false    |
+     #----------------------------------------------------#
 
 Scenario: Getting all records
   Given I have a model for Appliance

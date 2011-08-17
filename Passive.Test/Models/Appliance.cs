@@ -11,6 +11,7 @@ namespace Passive.Test.Models
         public string Name { get; set; }
         public string Color { get; set; }
         public int Amps { get; set; }
+        public bool InStock { get; set; }
 
         public bool Equals(Appliance other)
         {
@@ -25,7 +26,8 @@ namespace Passive.Test.Models
             return other.Id == this.Id
                 && Equals(other.Name, this.Name)
                 && Equals(other.Color, this.Color)
-                && other.Amps == this.Amps;
+                && other.Amps == this.Amps
+                && other.InStock == this.InStock;
         }
 
         public override bool Equals(object obj)
@@ -53,6 +55,7 @@ namespace Passive.Test.Models
                 result = (result*397) ^ (this.Name != null ? this.Name.GetHashCode() : 0);
                 result = (result*397) ^ (this.Color != null ? this.Color.GetHashCode() : 0);
                 result = (result*397) ^ this.Amps;
+                result = (result*(this.InStock ? 1 : 397));
                 return result;
             }
         }

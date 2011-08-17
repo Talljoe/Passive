@@ -253,7 +253,7 @@ namespace Passive.Test.DynamicModelTests
 
         private static Appliance CreateApplianceFromDynamic(dynamic d)
         {
-            return new Appliance { Id = d.Id, Name = d.Name, Color = d.Color, Amps = d.Amps };
+            return new Appliance { Id = d.Id, Name = d.Name, Color = d.Color, Amps = d.Amps, InStock = d.InStock };
         }
     }
 }
