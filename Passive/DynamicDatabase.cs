@@ -97,7 +97,7 @@ namespace Passive
 
         private void Initialize(string connectionString, string providerName, IEnumerable<IDatabaseDetector> databaseDetectors = null)
         {
-            databaseDetectors = (databaseDetectors ?? Enumerable.Empty<DatabaseDetector>()).DefaultIfEmpty(new DatabaseDetector());
+            databaseDetectors = (databaseDetectors ?? Enumerable.Empty<DatabaseDetector>()).DefaultIfEmpty(new DatabaseDetector()).OfType<IDatabaseDetector>();
 
             this._factory = DbProviderFactories.GetFactory(providerName);
             this._connectionString = connectionString;
